@@ -16,4 +16,13 @@ public class Account {
         this.userid = userid;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", balance='" + balance + '\'' +
+                ", userid='" + userid + '\'' +
+                '}';
+    }
 }

@@ -14,7 +14,7 @@ public class DaoFactory {
         if(dataSource == null){
             HikariDataSource ds = new HikariDataSource();
             ds.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres");
-            ds.setUsername("postgresql");
+            ds.setUsername("postgres");
             ds.setPassword("password");
             // Параметры HikariCP можно настроить тут же:
             //maximumPoolSize

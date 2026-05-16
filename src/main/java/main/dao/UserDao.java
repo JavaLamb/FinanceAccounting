@@ -14,7 +14,7 @@ public class UserDao implements Dao<User, Integer> {
 
 
     @Override
-    public List<User> findByAll() {
+    public List<User> findAll() {
         return List.of();
     }
 

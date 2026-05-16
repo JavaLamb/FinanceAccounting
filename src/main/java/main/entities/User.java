@@ -5,6 +5,11 @@ public class User {
     Integer id;
     String email;
     String hashPassword;
+    Account account1;
+    Account account2;
+    Account account3;
+    Account account4;
+    Account account5;
 
     public User() {
     }
@@ -17,5 +22,9 @@ public class User {
 
     public String getHashPassword() {
         return hashPassword;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }

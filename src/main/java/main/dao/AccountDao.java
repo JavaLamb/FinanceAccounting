@@ -1,7 +1,10 @@
 package main.dao;
 
 import main.entities.Account;
+import main.entities.AccountType;
+import main.entities.User;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,9 +23,9 @@ public class AccountDao implements Dao<Account, Integer> {
     @Override
     public Account findById(Integer id) {
         String sql = "select * from accounts where userid = ?";
-        try(Connection connection = getConnection();
-            PreparedStatement pstmnt = connection.prepareStatement(sql)){
-            pstmnt.setInt(1,id);
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setInt(1, id);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException("Error with AccountDao - findById", e);
@@ -32,6 +35,26 @@ public class AccountDao implements Dao<Account, Integer> {
 
     @Override
     public Account insert(Account account) {
+        String sql = "insert into accounts (name, userid, type) values (?,?,?) returning *";
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setString(1, account.getName());
+            pstmnt.setInt(2, account.getUserId());
+            pstmnt.setString(3, String.valueOf(account.getAccountType()));
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                if (rs.next()) {
+                    return (new Account(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getBigDecimal("balance"),
+                            rs.getInt("userid"),
+                            AccountType.valueOf(rs.getString("type"))));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with AccountDao - findUsersAccountById", e);
+        }
         return null;
     }
 
@@ -48,12 +71,17 @@ public class AccountDao implements Dao<Account, Integer> {
     public List<Account> findUsersAccountById(Integer id) {
         List<Account> list = new ArrayList<Account>();
         String sql = "select * from accounts where userid = ?";
-        try(Connection connection = getConnection();
-            PreparedStatement pstmnt = connection.prepareStatement(sql)){
-            pstmnt.setInt(1,id);
-            try(ResultSet rs = pstmnt.executeQuery()){
-                while(rs.next()){
-                    list.add(new Account(rs.getInt("id"),rs.getString("name"),rs.getBigDecimal("balance"),rs.getInt("userid")));
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setInt(1, id);
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Account(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getBigDecimal("balance"),
+                            rs.getInt("userid"),
+                            AccountType.valueOf(rs.getString("type"))));
                 }
             }
         } catch (SQLException e) {
@@ -62,4 +90,22 @@ public class AccountDao implements Dao<Account, Integer> {
         }
         return list;
     }
+
+    public int countUsersAccounts(int id) {
+        String sql = "select count(*) from accounts where userid = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setInt(1, id);
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with AccountDao - accLimit", e);
+        }
+        return -1;
+    }
+
 }

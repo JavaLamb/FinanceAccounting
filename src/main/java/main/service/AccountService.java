@@ -5,19 +5,22 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
 
-import java.sql.SQLOutput;
 import java.util.List;
 
-public class AccountLogic {
-    AccountDao ad = new AccountDao();
+public class AccountService {
+    AccountDao accountDao;
+
+    public AccountService(AccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
 
     public List<Account> showAllAccounts(User user){
         Integer id = user.getId();
-        return ad.findUsersAccountById(id);
+        return accountDao.findUsersAccountById(id);
     }
 
     public boolean canCreateMoreAccount(int id){
-        int result = ad.countUsersAccounts(id);
+        int result = accountDao.countUsersAccounts(id);
         if(result != -1){
             return result < 5;
         }
@@ -26,6 +29,6 @@ public class AccountLogic {
 
 
     public void createAccount(User user, AccountType accType, String name){
-        ad.insert(new Account(name, user.getId(),accType));
+        accountDao.insert(new Account(name, user.getId(),accType));
     }
 }

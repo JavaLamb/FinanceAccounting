@@ -2,15 +2,24 @@ package main.ui;
 
 import main.entities.AccountType;
 import main.entities.User;
-import main.service.AccountLogic;
+import main.service.AccountService;
 import main.service.Authorization;
 
 import java.util.Scanner;
 
 public class App {
-    private final Scanner scanner = new Scanner(System.in);
+
+    public App(AccountService accountService, Authorization authorization, Scanner scanner) {
+        this.accountService = accountService;
+        this.authorization = authorization;
+        this.scanner = scanner;
+    }
+
+    private final AccountService accountService;
+    private final Authorization authorization;
+    private final Scanner scanner;
+
     User user = null;
-    AccountLogic al = new AccountLogic();
     Boolean running = true;
 
     public void start() {
@@ -35,11 +44,11 @@ public class App {
     }
 
     void showLoggedMenu(User user) {
-        System.out.println("Choose option as logged user: \n1.Show all accounts\n2.Create Account\n3.Exit");
+        System.out.println("Choose option accountService logged user: \n1.Show all accounts\n2.Create Account\n3.Exit");
         switch (Integer.parseInt(scanner.nextLine())) {
-            case 1 -> al.showAllAccounts(user).forEach(System.out::println);
+            case 1 -> accountService.showAllAccounts(user).forEach(System.out::println);
             case 2 -> {
-                if (al.canCreateMoreAccount(user.getId())) {
+                if (accountService.canCreateMoreAccount(user.getId())) {
                     System.out.println("Choose type of account:\n1.Debit\n2.Credit\n3.Savings\n4.Back");
                     AccountType at = switch (Integer.parseInt(scanner.nextLine())) {
                         case 1 -> at = AccountType.DEBIT;
@@ -50,7 +59,7 @@ public class App {
                     if (at != null) {
                         System.out.println("Enter account name: ");
                         String name = scanner.nextLine();
-                        al.createAccount(user, at, name);
+                        accountService.createAccount(user, at, name);
                     } else {
                         System.out.println("invalid option");
                     }
@@ -69,7 +78,6 @@ public class App {
         System.out.println("Введите password");
         String password = scanner.nextLine();
         //Передаем логин и пароль в сервис авторизации и ждем возвращаемого user
-        Authorization authorization = new Authorization();
         return authorization.auth(email, password);
     }
 }

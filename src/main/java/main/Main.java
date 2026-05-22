@@ -1,12 +1,14 @@
 package main;
 
+import main.ApplicationContext.ApplicationContext;
 import main.ui.App;
 
 import java.util.Scanner;
 
 public class Main {
     static void main(String[] args) {
-        App app = new App();
+        ApplicationContext applicationContext = new ApplicationContext();
+        App app = applicationContext.getApp();
         app.start();
     }
 }

@@ -5,12 +5,16 @@ import main.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Authorization {
-    UserDao uDao = new UserDao();
+    private final UserDao userDao;
+
+    public Authorization(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     public User auth(String email, String password) {
         User user = null;
         try {
-            user = uDao.findByEmail(email);
+            user = userDao.findByEmail(email);
         } catch (RuntimeException e) {
             System.out.println("Пользователь не найден");
         }

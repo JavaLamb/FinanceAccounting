@@ -2,9 +2,11 @@ package main.ApplicationContext;
 
 import main.dao.AccountDao;
 import main.dao.UserDao;
+import main.entities.User;
 import main.service.AccountService;
 import main.service.Authorization;
 import main.ui.App;
+import main.ui.UserMenu;
 
 import java.util.Scanner;
 
@@ -18,6 +20,7 @@ public class ApplicationContext {
     private final AccountService accountService = new AccountService(getAccountDao());
 
     private final App app = new App(getAccountService(),getAuthorization(),getScanner());
+//    private final UserMenu userMenu= new UserMenu() Как-то нужно Юзера сюда запихать, при этом сохранив логику зацикливания с помощью User != null или придумать аналог
 
     public UserDao getUserDao() {
         return userDao;

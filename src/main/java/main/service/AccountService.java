@@ -15,8 +15,7 @@ public class AccountService {
     }
 
     public List<Account> showAllAccounts(User user){
-        Integer id = user.getId();
-        return accountDao.findUsersAccountById(id);
+        return accountDao.findUsersAccountById(user.getId());
     }
 
     public boolean canCreateMoreAccount(int id){

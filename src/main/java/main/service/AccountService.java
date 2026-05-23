@@ -14,8 +14,8 @@ public class AccountService {
         this.accountDao = accountDao;
     }
 
-    public List<Account> showAllAccounts(User user){
-        return accountDao.findUsersAccountById(user.getId());
+    public List<Account> showAllAccounts(int id){
+        return accountDao.findUsersAccountById(id);
     }
 
     public boolean canCreateMoreAccount(int id){

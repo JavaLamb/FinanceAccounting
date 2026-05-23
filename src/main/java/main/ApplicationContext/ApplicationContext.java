@@ -20,7 +20,7 @@ public class ApplicationContext {
     private final AccountService accountService = new AccountService(getAccountDao());
 
     private final App app = new App(getAccountService(),getAuthorization(),getScanner());
-//    private final UserMenu userMenu= new UserMenu() Как-то нужно Юзера сюда запихать, при этом сохранив логику зацикливания с помощью User != null или придумать аналог
+    private final UserMenu userMenu= new UserMenu(getAccountService(), getScanner());
 
     public UserDao getUserDao() {
         return userDao;

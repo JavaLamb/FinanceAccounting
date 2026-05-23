@@ -1,5 +1,7 @@
 package main.ui;
 
+import main.ApplicationContext.ApplicationContext;
+import main.dao.AccountDao;
 import main.entities.AccountType;
 import main.entities.User;
 import main.service.AccountService;
@@ -10,17 +12,19 @@ import java.util.Scanner;
 public class App {
 
     public App(AccountService accountService, Authorization authorization, Scanner scanner) {
+
         this.accountService = accountService;
         this.authorization = authorization;
         this.scanner = scanner;
-    }
 
+        this.userMenu = new UserMenu(accountService, scanner);
+    }
+    User user = null;
+    Boolean running = true;
     private final AccountService accountService;
     private final Authorization authorization;
     private final Scanner scanner;
-
-    User user = null;
-    Boolean running = true;
+    private final UserMenu userMenu;
 
     public void start() {
         while (running) {
@@ -28,8 +32,9 @@ public class App {
                 //тут пользователь не авторизован еще
                 showUnLoggedMenu();
             } else {
-                System.out.println("тут будет следующий цикл пока запущено но со следующим меню уже соответственно");
-                showLoggedMenu(user);
+                userMenu.setUser(user);
+                userMenu.showMenu();
+//                showLoggedMenu(user);
             }
         }
     }
@@ -46,7 +51,7 @@ public class App {
     void showLoggedMenu(User user) {
         System.out.println("Choose option accountService logged user: \n1.Show all accounts\n2.Create Account\n3.Exit");
         switch (Integer.parseInt(scanner.nextLine())) {
-            case 1 -> accountService.showAllAccounts(user).forEach(System.out::println);
+            case 1 -> accountService.showAllAccounts(user.getId()).forEach(System.out::println);
             case 2 -> {
                 if (accountService.canCreateMoreAccount(user.getId())) {
                     System.out.println("Choose type of account:\n1.Debit\n2.Credit\n3.Savings\n4.Back");

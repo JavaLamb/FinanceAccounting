@@ -2,9 +2,8 @@ package main.ApplicationContext;
 
 import main.dao.AccountDao;
 import main.dao.UserDao;
-import main.entities.User;
 import main.service.AccountService;
-import main.service.Authorization;
+import main.service.AuthorizationService;
 import main.ui.App;
 import main.ui.UserMenu;
 
@@ -16,11 +15,10 @@ public class ApplicationContext {
     private final AccountDao accountDao =  new AccountDao();
     private final UserDao userDao = new UserDao();
     //Services
-    private final Authorization authorization = new Authorization(getUserDao());
+    private final AuthorizationService authorizationService = new AuthorizationService(getUserDao());
     private final AccountService accountService = new AccountService(getAccountDao());
 
     private final App app = new App(getAccountService(),getAuthorization(),getScanner());
-    private final UserMenu userMenu= new UserMenu(getAccountService(), getScanner());
 
     public UserDao getUserDao() {
         return userDao;
@@ -30,8 +28,8 @@ public class ApplicationContext {
         return accountDao;
     }
 
-    public Authorization getAuthorization() {
-        return authorization;
+    public AuthorizationService getAuthorization() {
+        return authorizationService;
     }
 
     public AccountService getAccountService() {

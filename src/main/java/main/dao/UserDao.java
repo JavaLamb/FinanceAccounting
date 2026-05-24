@@ -51,7 +51,7 @@ public class UserDao implements Dao<User, Integer> {
             pstmnt.setString(1,email);
             try(ResultSet rs = pstmnt.executeQuery()){
                 while(rs.next()){
-                    System.out.println("мы нашли!!!!");
+                    System.out.println("мы нашли!!!! We`re in UserDao right now. Can delete this string btw");
                     return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
                 }
             }

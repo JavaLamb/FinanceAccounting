@@ -3,13 +3,15 @@ package main.ui.actions;
 import main.entities.User;
 import main.service.AccountService;
 import main.ui.MenuAction;
+import main.ui.MenuState;
 
 public class ShowAllUsersAccount implements MenuAction {
-    User user;
     AccountService accountService;
+    User user;
 
-    public ShowAllUsersAccount(AccountService accountService) {
+    public ShowAllUsersAccount(AccountService accountService, User user) {
         this.accountService = accountService;
+        this.user = user;
     }
 
     @Override
@@ -18,11 +20,9 @@ public class ShowAllUsersAccount implements MenuAction {
     }
 
     @Override
-    public void execute() {
+    public MenuState execute() {
         accountService.showAllAccounts(user.getId()).forEach(System.out::println);
+        return MenuState.CONTINUE;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

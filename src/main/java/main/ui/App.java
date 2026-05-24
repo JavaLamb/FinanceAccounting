@@ -1,30 +1,26 @@
 package main.ui;
 
-import main.ApplicationContext.ApplicationContext;
-import main.dao.AccountDao;
 import main.entities.AccountType;
 import main.entities.User;
 import main.service.AccountService;
-import main.service.Authorization;
+import main.service.AuthorizationService;
 
 import java.util.Scanner;
 
 public class App {
 
-    public App(AccountService accountService, Authorization authorization, Scanner scanner) {
+    public App(AccountService accountService, AuthorizationService authorizationService, Scanner scanner) {
 
         this.accountService = accountService;
-        this.authorization = authorization;
+        this.authorizationService = authorizationService;
         this.scanner = scanner;
-
-        this.userMenu = new UserMenu(accountService, scanner);
     }
+
     User user = null;
     Boolean running = true;
     private final AccountService accountService;
-    private final Authorization authorization;
+    private final AuthorizationService authorizationService;
     private final Scanner scanner;
-    private final UserMenu userMenu;
 
     public void start() {
         while (running) {
@@ -32,9 +28,14 @@ public class App {
                 //тут пользователь не авторизован еще
                 showUnLoggedMenu();
             } else {
-                userMenu.setUser(user);
-                userMenu.showMenu();
-//                showLoggedMenu(user);
+                UserMenu userMenu = new UserMenu(accountService, scanner, user);
+                userMenu.build();
+                MenuState result = userMenu.showMenu();
+                if (result == MenuState.LOGOUT) {
+                    user = null;
+                } else if (result == MenuState.EXIT) {
+                    running = false;
+                }
             }
         }
     }
@@ -83,7 +84,9 @@ public class App {
         System.out.println("Введите password");
         String password = scanner.nextLine();
         //Передаем логин и пароль в сервис авторизации и ждем возвращаемого user
-        return authorization.auth(email, password);
+        User user = authorizationService.auth(email, password);
+        this.user = user;
+        return user;
     }
 }
 

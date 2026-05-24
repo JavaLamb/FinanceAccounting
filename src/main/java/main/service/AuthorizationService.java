@@ -4,12 +4,12 @@ import main.dao.UserDao;
 import main.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
 
-public class Authorization {
+public class AuthorizationService {
     private final UserDao userDao;
 
 
 
-    public Authorization(UserDao userDao) {
+    public AuthorizationService(UserDao userDao) {
         this.userDao = userDao;
     }
 

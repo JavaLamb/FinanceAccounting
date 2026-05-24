@@ -12,11 +12,11 @@ abstract public class Menu {
         this.scanner = scanner;
     }
 
-    protected void showMenu(){
+    protected MenuState showMenu(){
         for (int i = 0; i < actions.size(); i++) {
             System.out.println((i + 1) + ". " + actions.get(i).showText());
         }
         int choice = Integer.parseInt(scanner.nextLine());
-        actions.get(choice - 1).execute();
+        return actions.get(choice - 1).execute();
     }
 }

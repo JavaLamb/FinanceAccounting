@@ -17,7 +17,6 @@ User user;
         super(scanner);
         this.user = user;
         this.accountService = accountService;
-//        showAllUsersAccount = new ShowAllUsersAccount(accountService, user);
     }
 
     public void build(){
@@ -25,13 +24,5 @@ User user;
         actions.add(new CreateNewAccount(accountService, user, scanner));
         actions.add(new Logout());
         actions.add(new Exit());
-
     }
-
-//    public void build(User user){
-//        showAllUsersAccount.setUser(user);
-//        actions.add(new ShowAllUsersAccount(this.accountService));
-//    }
-    // Интегрировать с ApplicationContext
-    // После переделки удалить старый вариант меню
 }

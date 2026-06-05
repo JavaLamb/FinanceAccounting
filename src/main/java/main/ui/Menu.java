@@ -19,4 +19,5 @@ abstract public class Menu {
         int choice = Integer.parseInt(scanner.nextLine());
         return actions.get(choice - 1).execute();
     }
+    abstract public void build();
 }

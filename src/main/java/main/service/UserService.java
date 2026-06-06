@@ -10,7 +10,12 @@ public class UserService {
         this.userDao = userDao;
     }
 
-    public UserDao getUserDao() {
-        return userDao;
+    public User findByEmailService(String email){
+        return userDao.findByEmail(email);
+    }
+
+    public boolean checkPassword(String password, User user){
+        String hash = user.getHashPassword();
+        return BCrypt.checkpw(password, hash);
     }
 }

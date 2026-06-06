@@ -2,6 +2,7 @@ package main.ui.actions;
 
 import main.dao.UserDao;
 import main.entities.User;
+import main.service.UserService;
 import main.ui.MenuAction;
 import main.ui.MenuState;
 import main.ui.Session;
@@ -10,11 +11,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.Scanner;
 
 public class Authorization implements MenuAction {
-    private final UserDao userDao;
+    private final UserService userService;
     private final Scanner scanner;
     private final Session session;
-    public Authorization(UserDao userDao, Scanner scanner, Session session) {
-        this.userDao = userDao;
+    public Authorization(UserService userService, Scanner scanner, Session session) {
+        this.userService = userService;
         this.scanner = scanner;
         this.session = session;
     }
@@ -30,7 +31,7 @@ public class Authorization implements MenuAction {
         System.out.println("Введите email: ");
         String email = scanner.nextLine();
         try {
-            user = userDao.findByEmail(email);
+            user = userService.findByEmailService(email);
         } catch (RuntimeException e) {
             System.out.println("Пользователь не найден");
             return null;
@@ -38,8 +39,7 @@ public class Authorization implements MenuAction {
         if (user != null) {
             System.out.println("Введите пароль: ");
             String password = scanner.nextLine();
-            String hash = user.getHashPassword();
-            if (BCrypt.checkpw(password, hash)) {
+            if(userService.checkPassword(password,user)){
                 session.setCurrentUser(user);
                 return MenuState.CONTINUE;
             }else{

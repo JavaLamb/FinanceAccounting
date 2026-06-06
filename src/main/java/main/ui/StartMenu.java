@@ -16,7 +16,7 @@ public class StartMenu extends Menu{
         this.session = session;
     }
     public void build(){
-        actions.add(new Authorization(userService.getUserDao(), scanner, session));
+        actions.add(new Authorization(userService, scanner, session));
         actions.add(new Exit());
     }
 }

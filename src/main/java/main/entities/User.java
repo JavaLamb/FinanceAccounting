@@ -1,5 +1,7 @@
 package main.entities;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class User {
     //Some fields of entitie which contain state of object
     Integer id;
@@ -11,7 +13,9 @@ public class User {
     Account account4;
     Account account5;
 
-    public User() {
+    public User(String email, String password) {
+        this.email = email;
+        this.hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     public User(Integer id, String email, String hashPassword) {
@@ -26,5 +30,9 @@ public class User {
 
     public Integer getId() {
         return id;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

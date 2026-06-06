@@ -19,8 +19,8 @@ public class UserDao implements Dao<User, Integer> {
     }
 
     @Override
-    public User findById(Integer integer){
-        try(Connection connection = getConnection()){
+    public User findById(Integer integer) {
+        try (Connection connection = getConnection()) {
             //Тут у нас будет запрос, rs и возврат User объекта
             //Что-то надо придумать с исключением как его ловить нормально и обрабатывать
         } catch (SQLException e) {
@@ -31,6 +31,20 @@ public class UserDao implements Dao<User, Integer> {
 
     @Override
     public User insert(User user) {
+        String sql = "insert into users (email, password) VALUES (?, ?) returning id,email,password";
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setString(1, user.getEmail());
+            pstmnt.setString(2, user.getHashPassword());
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with UserDao - insert", e);
+        }
         return null;
     }
 
@@ -44,14 +58,13 @@ public class UserDao implements Dao<User, Integer> {
         return false;
     }
 
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
         String sql = "select * from users where email = ?";
-        try(Connection connection = getConnection();
-        PreparedStatement pstmnt = connection.prepareStatement(sql)){
-            pstmnt.setString(1,email);
-            try(ResultSet rs = pstmnt.executeQuery()){
-                while(rs.next()){
-                    System.out.println("мы нашли!!!! We`re in UserDao right now. Can delete this string btw");
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setString(1, email);
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                while (rs.next()) {
                     return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
                 }
             }
@@ -59,7 +72,6 @@ public class UserDao implements Dao<User, Integer> {
             System.out.println(e.getMessage());
             throw new RuntimeException("Error with UserDao - findById", e);
         }
-        System.out.println("Пользователь не найден");
         return null;
     }
 }

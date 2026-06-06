@@ -6,9 +6,8 @@ public class Transaction {
     int id;
     int fromAccountId;
     int toAccountId;
-    int categoryId;
+    TransactionType categoryId;
     BigDecimal amount;
-
 
     public int getId() {
         return id;
@@ -22,7 +21,7 @@ public class Transaction {
         return toAccountId;
     }
 
-    public int getCategoryId() {
+    public TransactionType getCategoryId() {
         return categoryId;
     }
 
@@ -30,7 +29,7 @@ public class Transaction {
         return amount;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(TransactionType categoryId) {
         this.categoryId = categoryId;
     }
 }

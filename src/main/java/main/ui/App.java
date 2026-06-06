@@ -1,7 +1,5 @@
 package main.ui;
 
-import main.entities.AccountType;
-import main.entities.User;
 import main.service.AccountService;
 import main.service.UserService;
 
@@ -27,7 +25,10 @@ public class App {
 
                 StartMenu startMenu = new StartMenu(scanner,userService,session);
                 startMenu.build();
-                startMenu.showMenu();
+                MenuState result = startMenu.showMenu();
+                if (result == MenuState.EXIT){
+                    running = false;
+                }
             } else {
                 UserMenu userMenu = new UserMenu(accountService, scanner, session.getCurrentUser());
                 userMenu.build();

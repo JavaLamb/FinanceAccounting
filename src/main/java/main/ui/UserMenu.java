@@ -2,10 +2,10 @@ package main.ui;
 
 import main.entities.User;
 import main.service.AccountService;
-import main.ui.actions.CreateNewAccount;
+import main.ui.actions.UserMenu.CreateNewAccount;
 import main.ui.actions.Exit;
 import main.ui.actions.Logout;
-import main.ui.actions.ShowAllUsersAccount;
+import main.ui.actions.UserMenu.ShowAllUsersAccount;
 
 import java.util.Scanner;
 

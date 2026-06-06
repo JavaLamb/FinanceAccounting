@@ -18,4 +18,9 @@ public class UserService {
         String hash = user.getHashPassword();
         return BCrypt.checkpw(password, hash);
     }
+
+    public void createUser(String email, String password){
+        User newUser = new User(email, password);
+        userDao.insert(newUser);
+    }
 }

@@ -1,4 +1,4 @@
-package main.ui.actions;
+package main.ui.actions.UserMenu;
 
 import main.entities.AccountType;
 import main.entities.User;
@@ -9,13 +9,14 @@ import main.ui.MenuState;
 import java.util.Scanner;
 
 public class CreateNewAccount implements MenuAction {
-    AccountService accountService;
+    private final AccountService accountService;
     User user;
-    Scanner scanner;
+    private final Scanner scanner;
 
     public CreateNewAccount(AccountService accountService, User user, Scanner scanner) {
         this.accountService = accountService;
         this.user = user;
+        this.scanner = scanner;
     }
 
     @Override

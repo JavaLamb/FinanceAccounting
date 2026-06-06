@@ -1,4 +1,4 @@
-package main.ui.actions;
+package main.ui.actions.UserMenu;
 
 import main.entities.User;
 import main.service.AccountService;

@@ -1,12 +1,10 @@
-package main.ui.actions;
+package main.ui.actions.StartMenu;
 
-import main.dao.UserDao;
 import main.entities.User;
 import main.service.UserService;
 import main.ui.MenuAction;
 import main.ui.MenuState;
 import main.ui.Session;
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Scanner;
 

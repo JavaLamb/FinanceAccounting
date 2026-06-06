@@ -1,6 +1,6 @@
 package main.ui;
 
-public interface MenuAction<T> {
+public interface MenuAction {
     String showText();
     MenuState execute();
 

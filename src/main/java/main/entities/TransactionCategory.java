@@ -4,6 +4,7 @@ public class TransactionCategory {
     int id;
     String transactionName;
     int userid;
+    //Здесь мы  хотим дать возможность пользователю создавать кастомные категории, из-за чего нужно хранить userid.
 
     public int getId() {
         return id;

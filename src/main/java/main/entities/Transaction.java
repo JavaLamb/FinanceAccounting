@@ -8,6 +8,11 @@ public class Transaction {
     int toAccountId;
     TransactionType categoryId;
     BigDecimal amount;
+    TransactionCategory category;
+
+    public TransactionCategory getCategory() {
+        return category;
+    }
 
     public int getId() {
         return id;

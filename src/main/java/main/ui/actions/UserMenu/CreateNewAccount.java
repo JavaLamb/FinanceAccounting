@@ -30,10 +30,10 @@ public class CreateNewAccount implements MenuAction {
             if (accountService.canCreateMoreAccount(user.getId())) {
                 System.out.println("Choose type of account:\n1.Debit\n2.Credit\n3.Savings\n4.Back");
                 AccountType at = switch (Integer.parseInt(scanner.nextLine())) {
-                    case 1 -> at = AccountType.DEBIT;
-                    case 2 -> at = AccountType.CREDIT;
-                    case 3 -> at = AccountType.SAVINGS;
-                    default -> at = null;
+                    case 1 -> AccountType.DEBIT;
+                    case 2 -> AccountType.CREDIT;
+                    case 3 -> AccountType.SAVINGS;
+                    default -> null;
                 };
                 if (at != null) {
                     System.out.println("Enter account name: ");

@@ -1,6 +1,7 @@
 package main.ui;
 
 import main.service.AccountService;
+import main.service.TransactionService;
 import main.service.UserService;
 
 import java.util.Scanner;
@@ -8,14 +9,16 @@ import java.util.Scanner;
 public class App {
     Session session = new Session();
 
-    public App(AccountService accountService, UserService userService, Scanner scanner) {
+    public App(AccountService accountService, TransactionService transactionService, UserService userService, Scanner scanner) {
         this.accountService = accountService;
+        this.transactionService = transactionService;
         this.userService = userService;
         this.scanner = scanner;
     }
 
     Boolean running = true;
     private final AccountService accountService;
+    private final TransactionService transactionService;
     private final UserService userService;
     private final Scanner scanner;
 
@@ -30,7 +33,7 @@ public class App {
                     running = false;
                 }
             } else {
-                UserMenu userMenu = new UserMenu(accountService, scanner, session.getCurrentUser());
+                UserMenu userMenu = new UserMenu(accountService, scanner, session.getCurrentUser(), transactionService);
                 userMenu.build();
                 MenuState result = userMenu.showMenu();
                 if (result == MenuState.LOGOUT) {

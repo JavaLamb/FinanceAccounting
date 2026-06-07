@@ -5,6 +5,7 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class AccountService {
@@ -14,20 +15,27 @@ public class AccountService {
         this.accountDao = accountDao;
     }
 
-    public List<Account> showAllAccounts(int id){
-        return accountDao.findUsersAccountById(id);
+    public List<Account> showAllAccounts(int Userid) {
+        return accountDao.findUsersAccountById(Userid);
     }
 
-    public boolean canCreateMoreAccount(int id){
+    public boolean canCreateMoreAccount(int id) {
         int result = accountDao.countUsersAccounts(id);
-        if(result != -1){
+        if (result != -1) {
             return result < 5;
         }
         return false;
     }
 
+    public boolean isExist(int id) {
+        return accountDao.findById(id) != null;
+    }
 
-    public void createAccount(User user, AccountType accType, String name){
-        accountDao.insert(new Account(name, user.getId(),accType));
+    public void createAccount(User user, AccountType accType, String name) {
+        accountDao.insert(new Account(name, user.getId(), accType));
+    }
+
+    public BigDecimal getBalance(int accountId){
+        return accountDao.findById(accountId).getBalance();
     }
 }

@@ -12,6 +12,7 @@ public class Account {
     public Account() {
     }
 
+
     public Account(String name, Integer userId, AccountType accountType) {
         this.name = name;
         this.userId = userId;
@@ -40,6 +41,14 @@ public class Account {
 
     public Integer getId() {
         return id;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
 
     public Integer getUserId() {

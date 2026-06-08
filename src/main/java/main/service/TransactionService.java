@@ -3,6 +3,7 @@ package main.service;
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
 import main.entities.Account;
+import main.entities.Transaction;
 import main.entities.TransactionType;
 
 import java.math.BigDecimal;
@@ -30,28 +31,34 @@ public class TransactionService {
 
 
     private void income(Account ownerAccount, BigDecimal amount) {
-        //Реализовал только обновление баланса в таблице аккаунтов. Надо еще реализовать создание транзакции и запись в таблицу транзакций
+
         BigDecimal updatedBalance = ownerAccount.getBalance().add(amount);
+        //Заглушка для категории транзакции.
+        int categoryId = 2;
+        transactionDao.insert(new Transaction(TransactionType.INCOME,ownerAccount.getId(),categoryId,amount));
         ownerAccount.setBalance(updatedBalance);
         accountService.accountDao.update(ownerAccount);
     }
 
     private void expense(Account ownerAccount, BigDecimal amount) {
-        //Реализовал только обновление баланса в таблице аккаунтов. Надо еще реализовать создание транзакции и запись в таблицу транзакций
-        if(isPossible(ownerAccount,amount)){
+        if (isPossible(ownerAccount, amount)) {
+            //Заглушка для категории транзакции.
+            int categoryId = 2;
+            transactionDao.insert(new Transaction(TransactionType.EXPENSE, ownerAccount.getId(),categoryId,amount));
             BigDecimal updatedBalance = ownerAccount.getBalance().subtract(amount);
             ownerAccount.setBalance(updatedBalance);
             accountService.accountDao.update(ownerAccount);
             System.out.println("Expense Transaction done");
-        }else{
+        } else {
             System.out.println("Balance is lower than amount of transaction");
         }
     }
 
     private void transfer(Account ownerAccount, int recipientAccId, BigDecimal amount) {
-        if(isPossible(ownerAccount,amount)){
-
-        }else{
+        if (isPossible(ownerAccount, amount)) {
+            expense(ownerAccount, amount);
+            income(accountService.accountDao.findById(recipientAccId), amount);
+        } else {
             System.out.println("Balance is lower than amount of transaction");
         }
     }
@@ -59,13 +66,14 @@ public class TransactionService {
     private boolean isPossible(Account account, BigDecimal amount) {
         return (accountService.getBalance(account.getId()).compareTo(amount)) >= 0;
     }
-    public BigDecimal readBigDecimal(Scanner scanner){
-        while(true){
-            try{
+
+    public BigDecimal readBigDecimal(Scanner scanner) {
+        while (true) {
+            try {
                 String input = scanner.nextLine().trim();
                 input = input.replace(',', '.');
                 BigDecimal amount = new BigDecimal(input);
-                if(amount.compareTo(BigDecimal.ZERO) <= 0){
+                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                     System.out.println("Amount have to be greater than 0. Try again.");
                     continue;
                 }

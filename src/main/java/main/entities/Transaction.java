@@ -1,32 +1,58 @@
 package main.entities;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class Transaction {
     int id;
-    int fromAccountId;
-    int toAccountId;
-    TransactionType categoryId;
+    Integer fromAccountId;
+    Integer toAccountId;
+    int categoryId;
+    TransactionType transactionType;
     BigDecimal amount;
-    TransactionCategory category;
+    LocalDateTime dateTime;
 
-    public TransactionCategory getCategory() {
-        return category;
+    public Transaction(TransactionType transactionType, Integer fromAccountId, Integer toAccountId, int categoryId, BigDecimal amount) {
+        this.transactionType = transactionType;
+        this.fromAccountId = fromAccountId;
+        this.toAccountId = toAccountId;
+        this.categoryId = categoryId;
+        this.amount = amount;
+    }
+
+    public Transaction(TransactionType transactionType, Integer AccountId, int categoryId, BigDecimal amount) {
+        switch(transactionType) {
+            case TransactionType.INCOME->this.toAccountId = AccountId;
+            case TransactionType.EXPENSE->this.fromAccountId = AccountId;
+        }
+        this.transactionType = transactionType;
+        this.categoryId = categoryId;
+        this.amount = amount;
+    }
+
+
+    public Transaction(int id, Integer fromAccountId, Integer toAccountId, int categoryId, BigDecimal amount, LocalDateTime dateTime) {
+        this.id = id;
+        this.fromAccountId = fromAccountId;
+        this.toAccountId = toAccountId;
+        this.categoryId = categoryId;
+        this.amount = amount;
+        this.dateTime = dateTime;
     }
 
     public int getId() {
         return id;
     }
 
-    public int getFromAccountId() {
+    public Integer getFromAccountId() {
         return fromAccountId;
     }
 
-    public int getToAccountId() {
+    public Integer getToAccountId() {
         return toAccountId;
     }
 
-    public TransactionType getCategoryId() {
+    public int getCategoryId() {
         return categoryId;
     }
 
@@ -34,7 +60,7 @@ public class Transaction {
         return amount;
     }
 
-    public void setCategoryId(TransactionType categoryId) {
+    public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
 }

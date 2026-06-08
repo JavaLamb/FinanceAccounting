@@ -40,6 +40,7 @@ public class CreateTransaction implements MenuAction {
         }
         Account selectedAccount = accountList.get(Integer.parseInt(scanner.nextLine()) - 1);
         System.out.println("Enter amount of transaction: ");
+        System.out.println("Your balance: " + accountService.getBalance(selectedAccount.getId()));
         BigDecimal amount = transactionService.readBigDecimal(scanner);
         System.out.println("Choose type of transaction:\n1.Income\n2.Expense\n3.Transfer\n");
         switch (Integer.parseInt(scanner.nextLine())) {

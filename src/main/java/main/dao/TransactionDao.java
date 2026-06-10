@@ -3,12 +3,14 @@ package main.dao;
 import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.Transaction;
+import main.entities.TransactionCategory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static main.dao.DaoFactory.getConnection;
@@ -50,6 +52,27 @@ public class TransactionDao implements Dao<Transaction, Integer> {
             throw new RuntimeException("Error with AccountDao - findUsersAccountById", e);
         }
         return null;
+    }
+
+    public List<TransactionCategory> showCategoriesDao(int userid){
+        List<TransactionCategory> list = new ArrayList<>();
+        String sql = "select * from transaction_category where userid = ? or userid is null";
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+            pstmnt.setInt(1, userid);
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new TransactionCategory(
+                            rs.getString("transaction_name"),
+                            rs.getInt("id")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with transactionDao - showCategoriesDao", e);
+        }
+        return list;
     }
 
     @Override

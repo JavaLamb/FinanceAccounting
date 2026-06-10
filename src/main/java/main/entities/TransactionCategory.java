@@ -3,8 +3,14 @@ package main.entities;
 public class TransactionCategory {
     int id;
     String transactionName;
-    int userid;
+    Integer userid;
     //Здесь мы  хотим дать возможность пользователю создавать кастомные категории, из-за чего нужно хранить userid.
+
+
+    public TransactionCategory(String transactionName, Integer id) {
+        this.transactionName = transactionName;
+        this.id = id;
+    }
 
     public int getId() {
         return id;
@@ -22,11 +28,16 @@ public class TransactionCategory {
         this.transactionName = transactionName;
     }
 
-    public int getUserid() {
+    public Integer getUserid() {
         return userid;
     }
 
-    public void setUserid(int userid) {
+    public void setUserid(Integer userid) {
         this.userid = userid;
+    }
+
+    @Override
+    public String toString() {
+        return "Name='" + transactionName + '\'';
     }
 }

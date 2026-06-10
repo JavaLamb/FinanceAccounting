@@ -4,9 +4,12 @@ import main.dao.AccountDao;
 import main.dao.TransactionDao;
 import main.entities.Account;
 import main.entities.Transaction;
+import main.entities.TransactionCategory;
 import main.entities.TransactionType;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class TransactionService {
@@ -18,32 +21,30 @@ public class TransactionService {
         this.accountService = accountService;
     }
 
-    public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount) {
+    public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount, int selectedCategory) {
         switch (tt) {
-            case TransactionType.INCOME -> income(ownerAccount, amount);
-            case TransactionType.EXPENSE -> expense(ownerAccount, amount);
+            case TransactionType.INCOME -> income(ownerAccount, amount, selectedCategory);
+            case TransactionType.EXPENSE -> expense(ownerAccount, amount, selectedCategory);
         }
     }
 
-    public void createTransaction(Account ownerAccount, int recipientAccId, BigDecimal amount) {
-        transfer(ownerAccount, recipientAccId, amount);
+    public void createTransaction(Account ownerAccount, int recipientAccId, BigDecimal amount, int selectedCategory) {
+        transfer(ownerAccount, recipientAccId, amount, selectedCategory);
     }
 
 
-    private void income(Account ownerAccount, BigDecimal amount) {
+    private void income(Account ownerAccount, BigDecimal amount, int selectedCategory) {
 
         BigDecimal updatedBalance = ownerAccount.getBalance().add(amount);
-        //Заглушка для категории транзакции.
-        int categoryId = 2;
+        int categoryId = selectedCategory;
         transactionDao.insert(new Transaction(TransactionType.INCOME,ownerAccount.getId(),categoryId,amount));
         ownerAccount.setBalance(updatedBalance);
         accountService.accountDao.update(ownerAccount);
     }
 
-    private void expense(Account ownerAccount, BigDecimal amount) {
+    private void expense(Account ownerAccount, BigDecimal amount, int selectedCategory) {
         if (isPossible(ownerAccount, amount)) {
-            //Заглушка для категории транзакции.
-            int categoryId = 2;
+            int categoryId = selectedCategory;
             transactionDao.insert(new Transaction(TransactionType.EXPENSE, ownerAccount.getId(),categoryId,amount));
             BigDecimal updatedBalance = ownerAccount.getBalance().subtract(amount);
             ownerAccount.setBalance(updatedBalance);
@@ -54,10 +55,10 @@ public class TransactionService {
         }
     }
 
-    private void transfer(Account ownerAccount, int recipientAccId, BigDecimal amount) {
+    private void transfer(Account ownerAccount, int recipientAccId, BigDecimal amount, int selectedCategory) {
         if (isPossible(ownerAccount, amount)) {
-            expense(ownerAccount, amount);
-            income(accountService.accountDao.findById(recipientAccId), amount);
+            expense(ownerAccount, amount, selectedCategory);
+            income(accountService.accountDao.findById(recipientAccId), amount, selectedCategory);
         } else {
             System.out.println("Balance is lower than amount of transaction");
         }
@@ -82,6 +83,10 @@ public class TransactionService {
                 System.out.println("number format exception :(");
             }
         }
+    }
+
+    public List<TransactionCategory> showCategories(int userid){
+        return transactionDao.showCategoriesDao(userid);
     }
 
 }

@@ -19,8 +19,8 @@ public class UserService {
         return BCrypt.checkpw(password, hash);
     }
 
-    public void createUser(String email, String password){
+    public User createUser(String email, String password){
         User newUser = new User(email, password);
-        userDao.insert(newUser);
+        return userDao.insert(newUser);
     }
 }

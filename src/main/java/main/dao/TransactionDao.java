@@ -1,7 +1,6 @@
 package main.dao;
 
-import main.entities.Account;
-import main.entities.AccountType;
+import main.dao.Transactional.ConnectionHolder;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
 
@@ -16,6 +15,14 @@ import java.util.List;
 import static main.dao.DaoFactory.getConnection;
 
 public class TransactionDao implements Dao<Transaction, Integer> {
+    Connection connection;
+    public TransactionDao(Connection connection) {
+        this.connection = connection;
+    }
+
+    public TransactionDao() {
+    }
+
     @Override
     public List<Transaction> findAll() {
         return List.of();
@@ -29,8 +36,8 @@ public class TransactionDao implements Dao<Transaction, Integer> {
     @Override
     public Transaction insert(Transaction transaction) {
         String sql = "insert into transactions (from_account_id, to_account_id, category_id, amount) values (?,?,?,?) returning *";
-        try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+        Connection connection = ConnectionHolder.get();
+        try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setObject(1, transaction.getFromAccountId());
             pstmnt.setObject(2, transaction.getToAccountId());
             pstmnt.setInt(3, transaction.getCategoryId());

@@ -1,5 +1,7 @@
 package main.dao;
 
+import main.dao.Transactional.ConnectionHolder;
+import main.dao.Transactional.TransactionManager;
 import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
@@ -73,8 +75,8 @@ public class AccountDao implements Dao<Account, Integer> {
     @Override
     public Account update(Account account) {
         String sql = "UPDATE accounts SET balance = ? WHERE id = ? returning id,name,balance,userid,type";
-        try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+        Connection connection = ConnectionHolder.get();
+        try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setBigDecimal(1, account.getBalance());
             pstmnt.setInt(2, account.getId());
             try (ResultSet rs = pstmnt.executeQuery()) {

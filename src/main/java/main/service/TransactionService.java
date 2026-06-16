@@ -2,12 +2,14 @@ package main.service;
 
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
+import main.dao.Transactional.TransactionManager;
 import main.entities.Account;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
 import main.entities.TransactionType;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -15,6 +17,7 @@ import java.util.Scanner;
 public class TransactionService {
     private final TransactionDao transactionDao;
     private final AccountService accountService;
+    private final TransactionManager transactionManager = new TransactionManager();
 
     public TransactionService(TransactionDao transactionDao, AccountService accountService) {
         this.transactionDao = transactionDao;
@@ -22,14 +25,40 @@ public class TransactionService {
     }
 
     public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount, int selectedCategory) {
-        switch (tt) {
-            case TransactionType.INCOME -> income(ownerAccount, amount, selectedCategory);
-            case TransactionType.EXPENSE -> expense(ownerAccount, amount, selectedCategory);
+        try {
+            transactionManager.begin();
+            switch (tt) {
+                case INCOME -> income(ownerAccount, amount, selectedCategory);
+
+                case EXPENSE -> expense(ownerAccount, amount, selectedCategory);
+            }
+            transactionManager.commit();
+        } catch (Exception e) {
+            try {
+                transactionManager.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            throw new RuntimeException(e);
         }
     }
 
     public void createTransaction(Account ownerAccount, int recipientAccId, BigDecimal amount, int selectedCategory) {
-        transfer(ownerAccount, recipientAccId, amount, selectedCategory);
+        try {
+            transactionManager.begin();
+
+            transfer(ownerAccount, recipientAccId, amount, selectedCategory);
+
+            transactionManager.commit();
+        } catch (Exception e) {
+            try {
+                transactionManager.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            throw new RuntimeException(e);
+        }
+
     }
 
 
@@ -37,7 +66,7 @@ public class TransactionService {
 
         BigDecimal updatedBalance = ownerAccount.getBalance().add(amount);
         int categoryId = selectedCategory;
-        transactionDao.insert(new Transaction(TransactionType.INCOME,ownerAccount.getId(),categoryId,amount));
+        transactionDao.insert(new Transaction(TransactionType.INCOME, ownerAccount.getId(), categoryId, amount));
         ownerAccount.setBalance(updatedBalance);
         accountService.accountDao.update(ownerAccount);
     }
@@ -45,7 +74,7 @@ public class TransactionService {
     private void expense(Account ownerAccount, BigDecimal amount, int selectedCategory) {
         if (isPossible(ownerAccount, amount)) {
             int categoryId = selectedCategory;
-            transactionDao.insert(new Transaction(TransactionType.EXPENSE, ownerAccount.getId(),categoryId,amount));
+            transactionDao.insert(new Transaction(TransactionType.EXPENSE, ownerAccount.getId(), categoryId, amount));
             BigDecimal updatedBalance = ownerAccount.getBalance().subtract(amount);
             ownerAccount.setBalance(updatedBalance);
             accountService.accountDao.update(ownerAccount);
@@ -85,7 +114,7 @@ public class TransactionService {
         }
     }
 
-    public List<TransactionCategory> showCategories(int userid){
+    public List<TransactionCategory> showCategories(int userid) {
         return transactionDao.showCategoriesDao(userid);
     }
 

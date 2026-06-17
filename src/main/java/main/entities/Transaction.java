@@ -63,4 +63,8 @@ public class Transaction {
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

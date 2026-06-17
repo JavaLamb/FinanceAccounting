@@ -2,10 +2,7 @@ package main.dao;
 
 import main.entities.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 import static main.dao.DaoFactory.getConnection;
@@ -31,14 +28,16 @@ public class UserDao implements Dao<User, Integer> {
 
     @Override
     public User insert(User user) {
-        String sql = "insert into users (email, password) VALUES (?, ?) returning id,email,password";
+        String sql = "insert into users (email, password) VALUES (?, ?)";
         try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+             PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, user.getEmail());
             pstmnt.setString(2, user.getHashPassword());
-            try (ResultSet rs = pstmnt.executeQuery()) {
-                if (rs.next()) {
-                    return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
+            pstmnt.executeUpdate();
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    user.setId(generatedKeys.getInt(1));
+                    return user;
                 }
             }
         } catch (SQLException e) {

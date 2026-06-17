@@ -13,7 +13,8 @@ public class Account {
     }
 
 
-    public Account(String name, Integer userId, AccountType accountType) {
+    public Account(String name, Integer userId, AccountType accountType, BigDecimal balance) {
+        this.balance = balance;
         this.name = name;
         this.userId = userId;
         this.accountType = accountType;
@@ -47,13 +48,27 @@ public class Account {
         return balance;
     }
 
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public void setId(Integer id) {
+        this.id = id;
     }
+
+
 
     @Override
     public String toString() {

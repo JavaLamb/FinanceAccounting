@@ -24,6 +24,22 @@ public class User {
         this.hashPassword = hashPassword;
     }
 
+    public User() {
+
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setHashPassword(String hashPassword) {
+        this.hashPassword = hashPassword;
+    }
+
     public String getHashPassword() {
         return hashPassword;
     }

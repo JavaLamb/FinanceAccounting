@@ -31,8 +31,8 @@ public class AccountService {
         return accountDao.findById(id) != null;
     }
 
-    public void createAccount(User user, AccountType accType, String name) {
-        accountDao.insert(new Account(name, user.getId(), accType));
+    public void createAccount(User user, AccountType accType, String name, BigDecimal balance) {
+        accountDao.insert(new Account(name, user.getId(), accType,balance));
     }
 
     public BigDecimal getBalance(int accountId){

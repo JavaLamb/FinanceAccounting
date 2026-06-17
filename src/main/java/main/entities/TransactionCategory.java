@@ -12,6 +12,9 @@ public class TransactionCategory {
         this.id = id;
     }
 
+    public TransactionCategory() {
+    }
+
     public int getId() {
         return id;
     }
@@ -24,7 +27,7 @@ public class TransactionCategory {
         return transactionName;
     }
 
-    public void setTransactionName(String transactionName) {
+    public void setTransactionCategoryName(String transactionName) {
         this.transactionName = transactionName;
     }
 

@@ -108,5 +108,12 @@
                          columnDataType="BIGINT"
                          defaultValue="0"/>
     </changeSet>
+    <!-- DATETIME default -->
+    <changeSet id="5-add-default-datetime-transactions" author="forum-user">
+        <addDefaultValue tableName="transactions"
+                         columnName="date_time"
+                         columnDataType="TIMESTAMP"
+                         defaultValueComputed="current_datetime()"/>
+    </changeSet>
 
 </databaseChangeLog>

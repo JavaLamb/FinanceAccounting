@@ -6,6 +6,7 @@ import main.service.AccountService;
 import main.ui.MenuAction;
 import main.ui.MenuState;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 public class CreateNewAccount implements MenuAction {
@@ -38,7 +39,7 @@ public class CreateNewAccount implements MenuAction {
                 if (at != null) {
                     System.out.println("Enter account name: ");
                     String name = scanner.nextLine();
-                    accountService.createAccount(user, at, name);
+                    accountService.createAccount(user, at, name, BigDecimal.valueOf(0));
                 } else {
                     System.out.println("invalid option");
                 }

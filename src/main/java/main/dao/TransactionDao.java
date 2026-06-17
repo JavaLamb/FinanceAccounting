@@ -4,10 +4,7 @@ import main.dao.Transactional.ConnectionHolder;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,23 +32,39 @@ public class TransactionDao implements Dao<Transaction, Integer> {
 
     @Override
     public Transaction insert(Transaction transaction) {
-        String sql = "insert into transactions (from_account_id, to_account_id, category_id, amount) values (?,?,?,?) returning *";
+        String sql = "insert into transactions (from_account_id, to_account_id, category_id, amount) values (?,?,?,?)";
         Connection connection = ConnectionHolder.get();
-        try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setObject(1, transaction.getFromAccountId());
             pstmnt.setObject(2, transaction.getToAccountId());
             pstmnt.setInt(3, transaction.getCategoryId());
             pstmnt.setBigDecimal(4, transaction.getAmount());
-            try (ResultSet rs = pstmnt.executeQuery()) {
-                if (rs.next()) {
-                    return (new Transaction(
-                            rs.getInt("id"),
-                            rs.getInt("from_account_id"),
-                            rs.getInt("to_account_id"),
-                            rs.getInt("category_id"),
-                            rs.getBigDecimal("amount"),
-                            rs.getObject("date_time", LocalDateTime.class)
-                    ));
+            pstmnt.executeUpdate();
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    transaction.setId(generatedKeys.getInt(1));
+                    return transaction;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Error with AccountDao - findUsersAccountById", e);
+        }
+        return null;
+    }
+
+    public TransactionCategory insertCategory(TransactionCategory category) {
+        String sql = "insert into transaction_category (transaction_name, userid) values (?,?)";
+
+        try (Connection connection = getConnection();
+             PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmnt.setString(1, category.getTransactionName());
+            pstmnt.setInt(2, category.getUserid());
+            pstmnt.executeUpdate();
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    category.setId(generatedKeys.getInt(1));
+                    return category;
                 }
             }
         } catch (SQLException e) {

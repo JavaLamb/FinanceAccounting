@@ -1,16 +1,10 @@
 package main.dao;
 
 import main.dao.Transactional.ConnectionHolder;
-import main.dao.Transactional.TransactionManager;
 import main.entities.Account;
 import main.entities.AccountType;
-import main.entities.User;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,20 +43,19 @@ public class AccountDao implements Dao<Account, Integer> {
 
     @Override
     public Account insert(Account account) {
-        String sql = "insert into accounts (name, userid, type) values (?,?,?) returning *";
+        String sql = "insert into accounts (name, userid, type, balance) values (?,?,?,?)";
         try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+             PreparedStatement pstmnt = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, account.getName());
             pstmnt.setInt(2, account.getUserId());
             pstmnt.setString(3, String.valueOf(account.getAccountType()));
-            try (ResultSet rs = pstmnt.executeQuery()) {
-                if (rs.next()) {
-                    return (new Account(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getBigDecimal("balance"),
-                            rs.getInt("userid"),
-                            AccountType.valueOf(rs.getString("type"))));
+            pstmnt.setBigDecimal(4, account.getBalance());
+            pstmnt.executeUpdate();
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()){
+                if (generatedKeys.next()) {
+                    int id = generatedKeys.getInt(1);
+                    account.setId(id);
+                    return account;
                 }
             }
         } catch (SQLException e) {
@@ -74,19 +67,14 @@ public class AccountDao implements Dao<Account, Integer> {
 
     @Override
     public Account update(Account account) {
-        String sql = "UPDATE accounts SET balance = ? WHERE id = ? returning id,name,balance,userid,type";
+        String sql = "UPDATE accounts SET balance = ? WHERE id = ?";
         Connection connection = ConnectionHolder.get();
         try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setBigDecimal(1, account.getBalance());
             pstmnt.setInt(2, account.getId());
-            try (ResultSet rs = pstmnt.executeQuery()) {
-                if (rs.next()) {
-                    return (new Account(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getBigDecimal("balance"),
-                            rs.getInt("userid"),
-                            AccountType.valueOf(rs.getString("type"))));
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    account.setId(generatedKeys.getInt(1));
                 }
             }
         } catch (SQLException e) {

@@ -10,6 +10,7 @@ import java.util.List;
 
 public class AccountService {
     AccountDao accountDao;
+    int accountLimit = 5;
 
     public AccountService(AccountDao accountDao) {
         this.accountDao = accountDao;
@@ -21,10 +22,10 @@ public class AccountService {
 
     public boolean canCreateMoreAccount(int id) {
         int result = accountDao.countUsersAccounts(id);
-        if (result != -1) {
-            return result < 5;
+        if (result < 0) {
+            return false;
         }
-        return false;
+        return result < accountLimit;
     }
 
     public boolean isExist(int id) {
@@ -32,10 +33,10 @@ public class AccountService {
     }
 
     public void createAccount(User user, AccountType accType, String name, BigDecimal balance) {
-        accountDao.insert(new Account(name, user.getId(), accType,balance));
+        accountDao.insert(new Account(name, user.getId(), accType, balance));
     }
 
-    public BigDecimal getBalance(int accountId){
+    public BigDecimal getBalance(int accountId) {
         return accountDao.findById(accountId).getBalance();
     }
 }

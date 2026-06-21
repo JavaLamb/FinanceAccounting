@@ -34,33 +34,37 @@ public class CreateTransaction implements MenuAction {
 
     @Override
     public MenuState execute() {
-        List<Account> accountList = new ArrayList<>(accountService.showAllAccounts(user.getId()));
-        System.out.println("Choose Account: ");
-        for (int i = 0; i < accountList.size(); i++) {
-            System.out.println((i + 1) + ". " + (accountList.get(i)).getName());
-        }
-        Account selectedAccount = accountList.get(Integer.parseInt(scanner.nextLine()) - 1);
-        System.out.println("Enter amount of transaction: ");
-        System.out.println("Your balance: " + accountService.getBalance(selectedAccount.getId()));
-        BigDecimal amount = transactionService.readBigDecimal(scanner);
-        System.out.println("Choose transaction_category: \n");
-        List<TransactionCategory> categoryList = new ArrayList<>(transactionService.showCategories(user.getId()));
-        for (int i = 0; i < categoryList.size(); i++) {
-            System.out.println((i + 1) + ". " + categoryList.get(i));
-        }
-        int selectedCategory = categoryList.get(Integer.parseInt(scanner.nextLine())-1).getId();
-        System.out.println("Choose type of transaction:\n1.Income\n2.Expense\n3.Transfer\n");
-        switch (Integer.parseInt(scanner.nextLine())) {
-            case 1 -> transactionService.createTransaction(TransactionType.INCOME, selectedAccount, amount, selectedCategory);
-            case 2 -> transactionService.createTransaction(TransactionType.EXPENSE, selectedAccount, amount, selectedCategory);
-            case 3 -> {
-                System.out.println("Enter recipient`s account id: ");
-                int recipientId = Integer.parseInt(scanner.nextLine());
-                if (accountService.isExist(recipientId)) {
-                    transactionService.createTransaction(selectedAccount, accountService.findByIdService(recipientId), amount, selectedCategory);
-                } else System.out.println("Recipient account does`t found");
+        try {
+            List<Account> accountList = new ArrayList<>(accountService.showAllAccounts(user.getId()));
+            System.out.println("Choose Account: ");
+            for (int i = 0; i < accountList.size(); i++) {
+                System.out.println((i + 1) + ". " + (accountList.get(i)).getName());
             }
-            default -> System.out.println("invalid option");
+            Account selectedAccount = accountList.get(Integer.parseInt(scanner.nextLine()) - 1);
+            System.out.println("Enter amount of transaction: ");
+            System.out.println("Your balance: " + accountService.getBalance(selectedAccount.getId()));
+            BigDecimal amount = transactionService.readBigDecimal(scanner);
+            System.out.println("Choose transaction_category: \n");
+            List<TransactionCategory> categoryList = new ArrayList<>(transactionService.showCategories(user.getId()));
+            for (int i = 0; i < categoryList.size(); i++) {
+                System.out.println((i + 1) + ". " + categoryList.get(i));
+            }
+            int selectedCategory = categoryList.get(Integer.parseInt(scanner.nextLine())-1).getId();
+            System.out.println("Choose type of transaction:\n1.Income\n2.Expense\n3.Transfer\n");
+            switch (Integer.parseInt(scanner.nextLine())) {
+                case 1 -> transactionService.createTransaction(TransactionType.INCOME, selectedAccount, amount, selectedCategory);
+                case 2 -> transactionService.createTransaction(TransactionType.EXPENSE, selectedAccount, amount, selectedCategory);
+                case 3 -> {
+                    System.out.println("Enter recipient`s account id: ");
+                    int recipientId = Integer.parseInt(scanner.nextLine());
+                    if (accountService.isExist(recipientId)) {
+                        transactionService.createTransaction(selectedAccount, accountService.findByIdService(recipientId), amount, selectedCategory);
+                    } else System.out.println("Recipient account does`t found");
+                }
+                default -> System.out.println("invalid option");
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Exception was found in CreateTransaction");
         }
         return MenuState.CONTINUE;
     }

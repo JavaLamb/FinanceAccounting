@@ -3,6 +3,7 @@ package main.service;
 import main.ApplicationContext.ApplicationContext;
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
+import main.dao.Transactional.ConnectionHolder;
 import main.dao.UserDao;
 import main.entities.Account;
 import main.entities.AccountType;
@@ -10,11 +11,15 @@ import main.entities.TransactionCategory;
 import main.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 
+import static main.dao.DaoFactory.getConnection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TransactionServiceTest {
     TransactionService subj;
@@ -69,9 +74,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void createTransactionRollbackWhenRecipientIdNotValid(){
-        AccountDao spyAccountDao = Mockito.spy(accountDao);
-
+    void createTransactionRollbackWhenCategoryIdNotValid() throws Exception {
         User user = new User();
         user.setEmail("email");
         user.setHashPassword("hash");
@@ -97,10 +100,18 @@ class TransactionServiceTest {
         to.setUserId(user.getId());
         accountDao.insert(to);
 
-        Mockito.doThrow(new RuntimeException("DB dropped")).when(spyAccountDao).update(to);
+        try (MockedStatic<ConnectionHolder> holderMock = Mockito.mockStatic(ConnectionHolder.class)) {
+            Connection real = getConnection();
+            Connection spy = Mockito.spy(real);
 
-        subj.createTransaction(from, to, BigDecimal.valueOf(50),2);
-        assertEquals(BigDecimal.valueOf(100), from.getBalance());
-        assertEquals(BigDecimal.valueOf(100), to.getBalance());
+            holderMock.when(ConnectionHolder::get).thenReturn(spy);
+
+            assertThrows(RuntimeException.class, () -> subj.createTransaction(from, to, BigDecimal.valueOf(50), 1));
+
+            Mockito.verify(spy, Mockito.times(2)).rollback();
+        }
+
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(accountDao.findById(from.getId()).getBalance()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(accountDao.findById(to.getId()).getBalance()));
     }
 }

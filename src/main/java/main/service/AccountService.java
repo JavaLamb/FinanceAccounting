@@ -27,6 +27,9 @@ public class AccountService {
         }
         return result < accountLimit;
     }
+    public Account findByIdService(int id){
+        return accountDao.findById(id);
+    }
 
     public boolean isExist(int id) {
         return accountDao.findById(id) != null;

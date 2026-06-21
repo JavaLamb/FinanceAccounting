@@ -38,7 +38,7 @@ public class DaoFactory {
             //keepaliveTime
             //leakDetectionThreshold
             dataSource = ds;
-            initDataBase();
+            initDataBase(ds);
         }
         return dataSource;
     }
@@ -50,7 +50,7 @@ public class DaoFactory {
         return getDataSource().getConnection();
     }
 
-    public static void initDataBase(){
+    public static void initDataBase(DataSource dataSource){
         try {
             DatabaseConnection connection = new JdbcConnection(dataSource.getConnection());
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);

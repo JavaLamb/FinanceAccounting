@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static main.dao.DaoFactory.getConnection;
+import static main.dao.DaoFactory.getDataSource;
 
 public class AccountDao implements Dao<Account, Integer> {
     @Override
@@ -20,11 +21,18 @@ public class AccountDao implements Dao<Account, Integer> {
     @Override
     public Account findById(Integer id) {
         String sql = "select * from accounts where id = ?";
-        try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
+        Connection connection = ConnectionHolder.get();
+        if(connection == null) {
+            try {
+                connection = getConnection();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setInt(1, id);
-            try (ResultSet rs = pstmnt.executeQuery()){
-                if(rs.next()){
+            try (ResultSet rs = pstmnt.executeQuery()) {
+                if (rs.next()) {
                     return new Account(
                             rs.getInt("id"),
                             rs.getString("name"),
@@ -45,13 +53,13 @@ public class AccountDao implements Dao<Account, Integer> {
     public Account insert(Account account) {
         String sql = "insert into accounts (name, userid, type, balance) values (?,?,?,?)";
         try (Connection connection = getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, account.getName());
             pstmnt.setInt(2, account.getUserId());
             pstmnt.setString(3, String.valueOf(account.getAccountType()));
             pstmnt.setBigDecimal(4, account.getBalance());
             pstmnt.executeUpdate();
-            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()){
+            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int id = generatedKeys.getInt(1);
                     account.setId(id);
@@ -72,6 +80,7 @@ public class AccountDao implements Dao<Account, Integer> {
         try (PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setBigDecimal(1, account.getBalance());
             pstmnt.setInt(2, account.getId());
+            pstmnt.executeUpdate();
             try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     account.setId(generatedKeys.getInt(1));
@@ -128,5 +137,4 @@ public class AccountDao implements Dao<Account, Integer> {
         }
         return -1;
     }
-
 }

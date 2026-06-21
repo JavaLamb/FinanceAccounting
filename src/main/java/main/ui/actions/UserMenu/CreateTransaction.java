@@ -57,7 +57,7 @@ public class CreateTransaction implements MenuAction {
                 System.out.println("Enter recipient`s account id: ");
                 int recipientId = Integer.parseInt(scanner.nextLine());
                 if (accountService.isExist(recipientId)) {
-                    transactionService.createTransaction(selectedAccount, recipientId, amount, selectedCategory);
+                    transactionService.createTransaction(selectedAccount, accountService.findByIdService(recipientId), amount, selectedCategory);
                 } else System.out.println("Recipient account does`t found");
             }
             default -> System.out.println("invalid option");

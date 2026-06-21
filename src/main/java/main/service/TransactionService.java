@@ -43,11 +43,11 @@ public class TransactionService {
         }
     }
 
-    public void createTransaction(Account ownerAccount, int recipientAccId, BigDecimal amount, int selectedCategory) {
+    public void createTransaction(Account ownerAccount, Account recipientAccount, BigDecimal amount, int selectedCategory) {
         try {
             transactionManager.begin();
 
-            transfer(ownerAccount, recipientAccId, amount, selectedCategory);
+            transfer(ownerAccount, recipientAccount, amount, selectedCategory);
 
             transactionManager.commit();
         } catch (Exception e) {
@@ -63,7 +63,6 @@ public class TransactionService {
 
 
     private void income(Account ownerAccount, BigDecimal amount, int selectedCategory) {
-
         BigDecimal updatedBalance = ownerAccount.getBalance().add(amount);
         int categoryId = selectedCategory;
         transactionDao.insert(new Transaction(TransactionType.INCOME, ownerAccount.getId(), categoryId, amount));
@@ -84,10 +83,10 @@ public class TransactionService {
         }
     }
 
-    private void transfer(Account ownerAccount, int recipientAccId, BigDecimal amount, int selectedCategory) {
+    private void transfer(Account ownerAccount, Account recipientAccount, BigDecimal amount, int selectedCategory) {
         if (isPossible(ownerAccount, amount)) {
             expense(ownerAccount, amount, selectedCategory);
-            income(accountService.accountDao.findById(recipientAccId), amount, selectedCategory);
+            income(recipientAccount, amount, selectedCategory);
         } else {
             System.out.println("Balance is lower than amount of transaction");
         }

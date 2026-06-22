@@ -106,9 +106,9 @@ class TransactionServiceTest {
 
             holderMock.when(ConnectionHolder::get).thenReturn(spy);
 
-            assertThrows(RuntimeException.class, () -> subj.createTransaction(from, to, BigDecimal.valueOf(50), 1));
+            assertThrows(RuntimeException.class, () -> subj.createTransaction(from, to, BigDecimal.valueOf(50), 2));
 
-            Mockito.verify(spy, Mockito.times(2)).rollback();
+            Mockito.verify(spy, Mockito.times(1)).rollback();
         }
 
         assertEquals(0, BigDecimal.valueOf(100).compareTo(accountDao.findById(from.getId()).getBalance()));

@@ -9,6 +9,7 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.TransactionCategory;
 import main.entities.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -16,6 +17,8 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import static main.dao.DaoFactory.getConnection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,8 +40,23 @@ class TransactionServiceTest {
         accountDao = context.getAccountDao();
         userDao = context.getUserDao();
         transactionDao = context.getTransactionDao();
+    }
 
+    @AfterEach
+    void clearDB(){
+        try(Connection connection = getConnection();
+        Statement stmnt = connection.createStatement()){
+            stmnt.execute("set referential_integrity false");
 
+            stmnt.execute("truncate table users restart identity");
+            stmnt.execute("truncate table transactions restart identity");
+            stmnt.execute("truncate table accounts restart identity");
+            stmnt.execute("truncate table transaction_category restart identity");
+
+            stmnt.execute("set referential_integrity true");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

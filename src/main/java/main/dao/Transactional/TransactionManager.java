@@ -1,38 +1,47 @@
 package main.dao.Transactional;
 
-import main.dao.DaoFactory;
+import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+@Service
 public class TransactionManager {
+    private final DataSource dataSource;
+
+    public TransactionManager(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public void begin() throws SQLException {
-        Connection connection = DaoFactory.getConnection();
+        Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
         ConnectionHolder.set(connection);
     }
-    public void commit()throws SQLException{
+
+    public void commit() throws SQLException {
         Connection connection = ConnectionHolder.get();
-        if(connection == null){
+        if (connection == null) {
             return;
         }
-        try{
+        try {
             connection.commit();
-        }finally{
+        } finally {
             connection.close();
             ConnectionHolder.remove();
         }
     }
-    public void rollback()throws SQLException{
+
+    public void rollback() throws SQLException {
         Connection connection = ConnectionHolder.get();
-        if(connection == null){
+        if (connection == null) {
             return;
         }
-        try{
+        try {
             connection.rollback();
         } catch (SQLException ignored) {
-        }finally {
+        } finally {
             connection.close();
         }
         ConnectionHolder.remove();

@@ -3,10 +3,15 @@ package main.ui;
 import main.service.AccountService;
 import main.service.TransactionService;
 import main.service.UserService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
-public class App {
+@Component
+@Profile("!test")
+public class App implements CommandLineRunner {
     Session session = new Session();
 
     public App(AccountService accountService, TransactionService transactionService, UserService userService, Scanner scanner) {
@@ -25,15 +30,14 @@ public class App {
     public void start() {
         while (running) {
             if (session.getCurrentUser() == null) {
-
-                StartMenu startMenu = new StartMenu(scanner,userService,session);
+                StartMenu startMenu = new StartMenu(scanner, userService, session);
                 startMenu.build();
                 MenuState result = startMenu.showMenu();
-                if (result == MenuState.EXIT){
+                if (result == MenuState.EXIT) {
                     running = false;
                 }
             } else {
-                UserMenu userMenu = new UserMenu(accountService, scanner, session.getCurrentUser(), transactionService);
+                UserMenu userMenu = new UserMenu(accountService, scanner, transactionService, session);
                 userMenu.build();
                 MenuState result = userMenu.showMenu();
                 if (result == MenuState.LOGOUT) {
@@ -43,6 +47,11 @@ public class App {
                 }
             }
         }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        start();
     }
 }
 

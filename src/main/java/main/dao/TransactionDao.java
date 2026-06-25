@@ -3,21 +3,19 @@ package main.dao;
 import main.dao.Transactional.ConnectionHolder;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static main.dao.DaoFactory.getConnection;
-
+@Repository
 public class TransactionDao implements Dao<Transaction, Integer> {
-    Connection connection;
-    public TransactionDao(Connection connection) {
-        this.connection = connection;
-    }
+    private final DataSource dataSource;
 
-    public TransactionDao() {
+    public TransactionDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -56,7 +54,7 @@ public class TransactionDao implements Dao<Transaction, Integer> {
     public TransactionCategory insertCategory(TransactionCategory category) {
         String sql = "insert into transaction_category (transaction_name, userid) values (?,?)";
 
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, category.getTransactionName());
             pstmnt.setInt(2, category.getUserid());
@@ -74,10 +72,10 @@ public class TransactionDao implements Dao<Transaction, Integer> {
         return null;
     }
 
-    public List<TransactionCategory> showCategoriesDao(int userid){
+    public List<TransactionCategory> showCategoriesDao(int userid) {
         List<TransactionCategory> list = new ArrayList<>();
         String sql = "select * from transaction_category where userid = ? or userid is null";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setInt(1, userid);
             try (ResultSet rs = pstmnt.executeQuery()) {

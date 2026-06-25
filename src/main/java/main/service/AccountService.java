@@ -4,12 +4,14 @@ import main.dao.AccountDao;
 import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Service
 public class AccountService {
-    AccountDao accountDao;
+    private final AccountDao accountDao;
     int accountLimit = 5;
 
     public AccountService(AccountDao accountDao) {

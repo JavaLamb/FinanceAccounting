@@ -1,6 +1,5 @@
 package main.service;
 
-import main.ApplicationContext.ApplicationContext;
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
 import main.dao.Transactional.ConnectionHolder;
@@ -14,38 +13,43 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static main.dao.DaoFactory.getConnection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest(properties = {
+        "JdbcUrl=jdbc:h2:mem:test_database;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
+        "JdbcUsername=user",
+        "JdbcPassword=",
+        "JdbcDriver=org.h2.Driver"
+})
+@ActiveProfiles("test")
 class TransactionServiceTest {
+    @Autowired
     TransactionService subj;
+    @Autowired
     AccountDao accountDao;
+    @Autowired
     UserDao userDao;
+    @Autowired
     TransactionDao transactionDao;
+    @Autowired
+    DataSource dataSource;
 
     @BeforeEach
     void setUp() {
-        System.setProperty("JdbcUrl", "jdbc:h2:mem:test_database");
-        System.setProperty("JdbcUsername", "user");
-        System.setProperty("JdbcPassword", "");
-        ApplicationContext context = new ApplicationContext();
-        subj = context.getTransactionService();
-        accountDao = context.getAccountDao();
-        userDao = context.getUserDao();
-        transactionDao = context.getTransactionDao();
-    }
-
-    @AfterEach
-    void clearDB(){
-        try(Connection connection = getConnection();
-        Statement stmnt = connection.createStatement()){
+        try (Connection connection = dataSource.getConnection();
+             Statement stmnt = connection.createStatement()) {
             stmnt.execute("set referential_integrity false");
 
             stmnt.execute("truncate table users restart identity");
@@ -57,6 +61,11 @@ class TransactionServiceTest {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @AfterEach
+    void clearDB() {
+
     }
 
     @Test
@@ -119,7 +128,7 @@ class TransactionServiceTest {
         accountDao.insert(to);
 
         try (MockedStatic<ConnectionHolder> holderMock = Mockito.mockStatic(ConnectionHolder.class)) {
-            Connection real = getConnection();
+            Connection real = dataSource.getConnection();
             Connection spy = Mockito.spy(real);
 
             holderMock.when(ConnectionHolder::get).thenReturn(spy);

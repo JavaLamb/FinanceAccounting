@@ -3,15 +3,21 @@ package main.dao;
 import main.dao.Transactional.ConnectionHolder;
 import main.entities.Account;
 import main.entities.AccountType;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static main.dao.DaoFactory.getConnection;
-import static main.dao.DaoFactory.getDataSource;
-
+@Repository
 public class AccountDao implements Dao<Account, Integer> {
+    private final DataSource dataSource;
+
+    public AccountDao(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @Override
     public List<Account> findAll() {
         return List.of();
@@ -22,9 +28,9 @@ public class AccountDao implements Dao<Account, Integer> {
     public Account findById(Integer id) {
         String sql = "select * from accounts where id = ?";
         Connection connection = ConnectionHolder.get();
-        if(connection == null) {
+        if (connection == null) {
             try {
-                connection = getConnection();
+                connection = dataSource.getConnection();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -52,7 +58,7 @@ public class AccountDao implements Dao<Account, Integer> {
     @Override
     public Account insert(Account account) {
         String sql = "insert into accounts (name, userid, type, balance) values (?,?,?,?)";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, account.getName());
             pstmnt.setInt(2, account.getUserId());
@@ -101,7 +107,7 @@ public class AccountDao implements Dao<Account, Integer> {
     public List<Account> findUsersAccountById(Integer id) {
         List<Account> list = new ArrayList<>();
         String sql = "select * from accounts where userid = ?";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setInt(1, id);
             try (ResultSet rs = pstmnt.executeQuery()) {
@@ -123,7 +129,7 @@ public class AccountDao implements Dao<Account, Integer> {
 
     public int countUsersAccounts(int id) {
         String sql = "select count(*) from accounts where userid = ?";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setInt(1, id);
             try (ResultSet rs = pstmnt.executeQuery()) {

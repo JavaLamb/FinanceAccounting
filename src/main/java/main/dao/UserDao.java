@@ -1,14 +1,19 @@
 package main.dao;
 
 import main.entities.User;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
 
-import static main.dao.DaoFactory.getConnection;
-
+@Repository
 public class UserDao implements Dao<User, Integer> {
+    private final DataSource dataSource;
 
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Override
     public List<User> findAll() {
@@ -17,9 +22,8 @@ public class UserDao implements Dao<User, Integer> {
 
     @Override
     public User findById(Integer integer) {
-        try (Connection connection = getConnection()) {
-            //Тут у нас будет запрос, rs и возврат User объекта
-            //Что-то надо придумать с исключением как его ловить нормально и обрабатывать
+        try (Connection connection = dataSource.getConnection()) {
+            System.out.println("findById не работает");
         } catch (SQLException e) {
             throw new RuntimeException("Error with findById", e);
         }
@@ -29,7 +33,7 @@ public class UserDao implements Dao<User, Integer> {
     @Override
     public User insert(User user) {
         String sql = "insert into users (email, password) VALUES (?, ?)";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmnt.setString(1, user.getEmail());
             pstmnt.setString(2, user.getHashPassword());
@@ -59,7 +63,7 @@ public class UserDao implements Dao<User, Integer> {
 
     public User findByEmail(String email) {
         String sql = "select * from users where email = ?";
-        try (Connection connection = getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setString(1, email);
             try (ResultSet rs = pstmnt.executeQuery()) {

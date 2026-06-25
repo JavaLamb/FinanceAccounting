@@ -7,21 +7,23 @@ import main.entities.Account;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
 import main.entities.TransactionType;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+@Service
 public class TransactionService {
     private final TransactionDao transactionDao;
-    private final AccountService accountService;
-    private final TransactionManager transactionManager = new TransactionManager();
+    private final AccountDao accountDao;
+    private final TransactionManager transactionManager;
 
-    public TransactionService(TransactionDao transactionDao, AccountService accountService) {
+    public TransactionService(TransactionDao transactionDao, AccountDao accountDao, TransactionManager transactionManager) {
         this.transactionDao = transactionDao;
-        this.accountService = accountService;
+        this.accountDao = accountDao;
+        this.transactionManager = transactionManager;
     }
 
     public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount, int selectedCategory) {
@@ -67,7 +69,7 @@ public class TransactionService {
         int categoryId = selectedCategory;
         transactionDao.insert(new Transaction(TransactionType.INCOME, ownerAccount.getId(), categoryId, amount));
         ownerAccount.setBalance(updatedBalance);
-        accountService.accountDao.update(ownerAccount);
+        accountDao.update(ownerAccount);
     }
 
     private void expense(Account ownerAccount, BigDecimal amount, int selectedCategory) {
@@ -76,7 +78,7 @@ public class TransactionService {
             transactionDao.insert(new Transaction(TransactionType.EXPENSE, ownerAccount.getId(), categoryId, amount));
             BigDecimal updatedBalance = ownerAccount.getBalance().subtract(amount);
             ownerAccount.setBalance(updatedBalance);
-            accountService.accountDao.update(ownerAccount);
+            accountDao.update(ownerAccount);
             System.out.println("Expense Transaction done");
         } else {
             System.out.println("Balance is lower than amount of transaction");
@@ -93,7 +95,7 @@ public class TransactionService {
     }
 
     private boolean isPossible(Account account, BigDecimal amount) {
-        return (accountService.getBalance(account.getId()).compareTo(amount)) >= 0;
+        return (accountDao.findById(account.getId()).getBalance().compareTo(amount)) >= 0;
     }
 
     public BigDecimal readBigDecimal(Scanner scanner) {

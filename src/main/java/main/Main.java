@@ -1,15 +1,19 @@
 package main;
 
-import main.ApplicationContext.ApplicationContext;
-import main.ui.App;
-import main.ui.UserMenu;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 import java.util.Scanner;
 
+
+@SpringBootApplication
 public class Main {
     static void main(String[] args) {
-        ApplicationContext applicationContext = new ApplicationContext();
-        App app = applicationContext.getApp();
-        app.start();
+        SpringApplication.run(Main.class, args);
+    }
+    @Bean
+    public Scanner scanner(){
+        return new Scanner(System.in);
     }
 }

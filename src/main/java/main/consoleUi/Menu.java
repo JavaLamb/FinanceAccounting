@@ -1,4 +1,4 @@
-package main.ui;
+package main.consoleUi;
 
 import java.util.ArrayList;
 import java.util.List;

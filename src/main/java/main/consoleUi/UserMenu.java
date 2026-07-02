@@ -1,13 +1,12 @@
-package main.ui;
+package main.consoleUi;
 
-import main.entities.User;
 import main.service.AccountService;
 import main.service.TransactionService;
-import main.ui.actions.UserMenu.CreateNewAccount;
-import main.ui.actions.Exit;
-import main.ui.actions.Logout;
-import main.ui.actions.UserMenu.CreateTransaction;
-import main.ui.actions.UserMenu.ShowAllUsersAccount;
+import main.consoleUi.actions.UserMenu.CreateNewAccount;
+import main.consoleUi.actions.Exit;
+import main.consoleUi.actions.Logout;
+import main.consoleUi.actions.UserMenu.CreateTransaction;
+import main.consoleUi.actions.UserMenu.ShowAllUsersAccount;
 
 import java.util.Scanner;
 

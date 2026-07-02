@@ -1,7 +1,7 @@
-package main.ui.actions;
+package main.consoleUi.actions;
 
-import main.ui.MenuAction;
-import main.ui.MenuState;
+import main.consoleUi.MenuAction;
+import main.consoleUi.MenuState;
 
 public class Logout implements MenuAction {
     @Override

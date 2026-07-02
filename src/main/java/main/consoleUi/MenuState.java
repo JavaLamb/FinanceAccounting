@@ -1,4 +1,4 @@
-package main.ui;
+package main.consoleUi;
 
 public enum MenuState {
     CONTINUE,

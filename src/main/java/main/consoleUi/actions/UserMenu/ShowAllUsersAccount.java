@@ -1,9 +1,9 @@
-package main.ui.actions.UserMenu;
+package main.consoleUi.actions.UserMenu;
 
 import main.entities.User;
 import main.service.AccountService;
-import main.ui.MenuAction;
-import main.ui.MenuState;
+import main.consoleUi.MenuAction;
+import main.consoleUi.MenuState;
 
 public class ShowAllUsersAccount implements MenuAction {
     AccountService accountService;

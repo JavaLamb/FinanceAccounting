@@ -1,9 +1,9 @@
-package main.ui;
+package main.consoleUi;
 
 import main.service.UserService;
-import main.ui.actions.StartMenu.Authorization;
-import main.ui.actions.Exit;
-import main.ui.actions.StartMenu.Registration;
+import main.consoleUi.actions.StartMenu.Authorization;
+import main.consoleUi.actions.Exit;
+import main.consoleUi.actions.StartMenu.Registration;
 
 import java.util.Scanner;
 

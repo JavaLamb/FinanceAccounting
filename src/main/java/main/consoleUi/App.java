@@ -1,4 +1,4 @@
-package main.ui;
+package main.consoleUi;
 
 import main.service.AccountService;
 import main.service.TransactionService;

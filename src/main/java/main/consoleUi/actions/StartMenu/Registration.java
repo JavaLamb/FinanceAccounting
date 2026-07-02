@@ -1,9 +1,8 @@
-package main.ui.actions.StartMenu;
+package main.consoleUi.actions.StartMenu;
 
 import main.service.UserService;
-import main.ui.MenuAction;
-import main.ui.MenuState;
-import main.ui.Session;
+import main.consoleUi.MenuAction;
+import main.consoleUi.MenuState;
 
 import java.util.Scanner;
 

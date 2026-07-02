@@ -1,4 +1,4 @@
-package main.ui;
+package main.consoleUi;
 
 public interface MenuAction {
     String showText();

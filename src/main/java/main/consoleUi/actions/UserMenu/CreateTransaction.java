@@ -1,4 +1,4 @@
-package main.ui.actions.UserMenu;
+package main.consoleUi.actions.UserMenu;
 
 import main.entities.Account;
 import main.entities.TransactionCategory;
@@ -6,8 +6,8 @@ import main.entities.TransactionType;
 import main.entities.User;
 import main.service.AccountService;
 import main.service.TransactionService;
-import main.ui.MenuAction;
-import main.ui.MenuState;
+import main.consoleUi.MenuAction;
+import main.consoleUi.MenuState;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

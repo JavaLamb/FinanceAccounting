@@ -6,20 +6,12 @@ import main.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(properties = {
-        "JdbcUrl=jdbc:h2:mem:test_database;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
-        "JdbcUsername=user",
-        "JdbcPassword=",
-        "JdbcDriver=org.h2.Driver"
-})
 @ActiveProfiles("test")
 class AccountDaoTest {
     @Autowired

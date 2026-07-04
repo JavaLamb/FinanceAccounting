@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
@@ -26,12 +25,7 @@ import java.sql.Statement;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest(properties = {
-        "JdbcUrl=jdbc:h2:mem:test_database;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
-        "JdbcUsername=user",
-        "JdbcPassword=",
-        "JdbcDriver=org.h2.Driver"
-})
+
 @ActiveProfiles("test")
 class TransactionServiceTest {
     @Autowired

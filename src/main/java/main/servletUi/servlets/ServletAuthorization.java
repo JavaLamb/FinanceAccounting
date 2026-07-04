@@ -2,16 +2,20 @@ package main.servletUi.servlets;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import main.entities.User;
 import main.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.io.IOException;
-
+@WebServlet(value = "/login", loadOnStartup = 1)
 public class ServletAuthorization extends HttpServlet {
     private UserService userService;
+    HttpSession session ;
 
     //Получили из контекста сервисы
     @Override
@@ -28,11 +32,19 @@ public class ServletAuthorization extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
+        req.getRequestDispatcher("login.html").forward(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String login = req.getParameter("login");
+        String password = req.getParameter("password");
+        User user = userService.findByEmailService(login);
+        if (userService.checkPassword(password,user)) {
+            session.setAttribute("CurrentUser", user);
+            HttpSession session = req.getSession(true);
+            session.setAttribute("currentUser", user);
+            resp.sendRedirect("success.html");
+        }
     }
 }

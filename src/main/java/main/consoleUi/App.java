@@ -3,15 +3,14 @@ package main.consoleUi;
 import main.service.AccountService;
 import main.service.TransactionService;
 import main.service.UserService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+//import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
-@Component
+//@Component
 @Profile("!test")
-public class App implements CommandLineRunner {
+public class App {
     Session session = new Session();
 
     public App(AccountService accountService, TransactionService transactionService, UserService userService, Scanner scanner) {
@@ -47,11 +46,6 @@ public class App implements CommandLineRunner {
                 }
             }
         }
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        start();
     }
 }
 

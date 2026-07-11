@@ -12,8 +12,7 @@ public class SpringInitializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            AnnotationConfigApplicationContext context =
-                    new AnnotationConfigApplicationContext();
+            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
             context.scan("main");
 

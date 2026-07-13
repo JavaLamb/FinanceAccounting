@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserDao implements Dao<User, Integer> {
@@ -61,20 +62,20 @@ public class UserDao implements Dao<User, Integer> {
         return false;
     }
 
-    public User findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         String sql = "select * from users where email = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql)) {
             pstmnt.setString(1, email);
             try (ResultSet rs = pstmnt.executeQuery()) {
-                while (rs.next()) {
-                    return new User(rs.getInt("id"), rs.getString("email"), rs.getString("password"));
+                if (rs.next()) {
+                    return Optional.of(new User(rs.getInt("id"), rs.getString("email"), rs.getString("password")));
                 }
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             throw new RuntimeException("Error with UserDao - findById", e);
         }
-        return null;
+        return Optional.empty();
     }
 }

@@ -1,4 +1,4 @@
-package main.servletUi.Reques;
+package main.servletUi.Request;
 
 import lombok.Data;
 

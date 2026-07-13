@@ -1,54 +1,22 @@
 package main.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.mindrot.jbcrypt.BCrypt;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     //Some fields of entitie which contain state of object
     Integer id;
     String email;
     String hashPassword;
-    Account account1;
-    Account account2;
-    Account account3;
-    Account account4;
-    Account account5;
 
     public User(String email, String password) {
         this.email = email;
         this.hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
-    public User(Integer id, String email, String hashPassword) {
-        this.id = id;
-        this.email = email;
-        this.hashPassword = hashPassword;
-    }
-
-    public User() {
-
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setHashPassword(String hashPassword) {
-        this.hashPassword = hashPassword;
-    }
-
-    public String getHashPassword() {
-        return hashPassword;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
     }
 }

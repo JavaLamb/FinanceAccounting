@@ -5,24 +5,31 @@ import main.entities.User;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UserDao userDao;
+
     public UserService(UserDao userDao) {
         this.userDao = userDao;
     }
 
-    public User findByEmailService(String email){
+    public Optional<User> findByEmailService(String email) {
         return userDao.findByEmail(email);
     }
 
-    public boolean checkPassword(String password, User user){
+    public boolean checkPassword(String password, User user) {
         String hash = user.getHashPassword();
         return BCrypt.checkpw(password, hash);
     }
 
-    public User createUser(String email, String password){
+    public User createUser(String email, String password) {
         User newUser = new User(email, password);
         return userDao.insert(newUser);
+    }
+
+    public boolean checkEmail(String email) {
+        return userDao.findByEmail(email).isPresent();
     }
 }

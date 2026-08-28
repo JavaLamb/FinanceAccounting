@@ -16,8 +16,7 @@ import java.util.Map;
 @WebServlet("/*")
 public class MainServlet extends HttpServlet {
     @SuppressWarnings("rawtypes")
-    private Map<String, Controller> routes = new HashMap<>();
-    private Map<String, Controller> springControllers;
+    private Map<String, WebController> springControllers;
     ObjectMapper om = new ObjectMapper();
 
     @Override
@@ -27,13 +26,7 @@ public class MainServlet extends HttpServlet {
         if (springContext == null) {
             throw new ServletException("SpringContext is null");
         }
-        springControllers = springContext.getBeansOfType(Controller.class);
-        for (Controller controller : springControllers.values()) {
-            String url = controller.getClass().getAnnotation(WebController.class).value();
-            if (url != null) {
-                routes.put(url, controller);
-            }
-        }
+        springControllers = springContext.getBeansOfType(WebController.class);
     }
 
     @Override
@@ -48,14 +41,14 @@ public class MainServlet extends HttpServlet {
 
     private void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String url = req.getRequestURI();
-        Controller controller = routes.get(url);
-        if (controller == null) {
+        WebController webController = springControllers.get(url);
+        if (webController == null) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         try {
-            Object request = om.readValue(req.getInputStream(), controller.getRequestClass());
-            Object response = controller.execute(request);
+            Object request = om.readValue(req.getInputStream(), webController.getRequestClass());
+            Object response = webController.execute(request);
             om.writeValue(resp.getOutputStream(), response);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

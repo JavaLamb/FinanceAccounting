@@ -2,15 +2,14 @@ package main.servletUi.Controllers;
 
 import lombok.AllArgsConstructor;
 import main.service.UserService;
-import main.servletUi.Controller;
+import main.servletUi.WebController;
 import main.servletUi.Request.LoginRequest;
 import main.servletUi.Response.LoginResponse;
-import main.servletUi.WebController;
+import org.springframework.stereotype.Controller;
 
 @AllArgsConstructor
-@WebController("/login")
-@org.springframework.stereotype.Controller
-public class LoginController implements Controller<LoginRequest, LoginResponse> {
+@Controller("/login")
+public class LoginWebController implements WebController<LoginRequest, LoginResponse> {
     private final UserService userService;
 
     @Override

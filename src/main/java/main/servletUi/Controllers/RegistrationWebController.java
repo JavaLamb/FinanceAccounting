@@ -1,17 +1,15 @@
 package main.servletUi.Controllers;
 
 import lombok.AllArgsConstructor;
-import main.entities.User;
 import main.service.UserService;
-import main.servletUi.Controller;
+import main.servletUi.WebController;
 import main.servletUi.Request.RegiRequest;
 import main.servletUi.Response.RegiResponse;
-import main.servletUi.WebController;
+import org.springframework.stereotype.Controller;
 
 @AllArgsConstructor
-@WebController("/registration")
-@org.springframework.stereotype.Controller
-public class RegistrationController implements Controller<RegiRequest, RegiResponse> {
+@Controller("/Registration")
+public class RegistrationWebController implements WebController<RegiRequest, RegiResponse> {
     private final UserService userService;
 
     @Override
@@ -26,6 +24,6 @@ public class RegistrationController implements Controller<RegiRequest, RegiRespo
 
     @Override
     public Class<RegiRequest> getRequestClass() {
-        return null;
+        return RegiRequest.class;
     }
 }

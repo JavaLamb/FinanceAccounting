@@ -1,8 +1,17 @@
 package main.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Transaction {
     int id;
     Integer fromAccountId;
@@ -40,31 +49,4 @@ public class Transaction {
         this.dateTime = dateTime;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public Integer getFromAccountId() {
-        return fromAccountId;
-    }
-
-    public Integer getToAccountId() {
-        return toAccountId;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }

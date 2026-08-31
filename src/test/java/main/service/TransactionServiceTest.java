@@ -70,7 +70,7 @@ class TransactionServiceTest {
 
         TransactionCategory category = new TransactionCategory();
         category.setId(1);
-        category.setTransactionCategoryName("category");
+        category.setTransactionName("category");
         category.setUserid(user.getId());
         transactionDao.insertCategory(category);
 
@@ -102,7 +102,7 @@ class TransactionServiceTest {
 
         TransactionCategory category = new TransactionCategory();
         category.setId(1);
-        category.setTransactionCategoryName("category");
+        category.setTransactionName("category");
         category.setUserid(user.getId());
         transactionDao.insertCategory(category);
 

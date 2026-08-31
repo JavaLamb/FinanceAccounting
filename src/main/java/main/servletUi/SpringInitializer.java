@@ -9,10 +9,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 @WebListener
 public class SpringInitializer implements ServletContextListener {
 
+    private AnnotationConfigApplicationContext context;
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+            context = new AnnotationConfigApplicationContext();
 
             context.scan("main");
 
@@ -25,5 +27,13 @@ public class SpringInitializer implements ServletContextListener {
         } catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        if(this.context != null){
+            this.context.close();
+        }
+        System.out.println("Spring context destroyed");
     }
 }

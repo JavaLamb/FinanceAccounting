@@ -8,7 +8,7 @@ import main.servletUi.Response.RegiResponse;
 import org.springframework.stereotype.Controller;
 
 @AllArgsConstructor
-@Controller("/Registration")
+@Controller("/registration")
 public class RegistrationWebController implements WebController<RegiRequest, RegiResponse> {
     private final UserService userService;
 

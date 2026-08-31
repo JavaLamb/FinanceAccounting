@@ -1,5 +1,14 @@
 package main.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionCategory {
     int id;
     String transactionName;
@@ -10,33 +19,6 @@ public class TransactionCategory {
     public TransactionCategory(String transactionName, Integer id) {
         this.transactionName = transactionName;
         this.id = id;
-    }
-
-    public TransactionCategory() {
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getTransactionName() {
-        return transactionName;
-    }
-
-    public void setTransactionCategoryName(String transactionName) {
-        this.transactionName = transactionName;
-    }
-
-    public Integer getUserid() {
-        return userid;
-    }
-
-    public void setUserid(Integer userid) {
-        this.userid = userid;
     }
 
     @Override

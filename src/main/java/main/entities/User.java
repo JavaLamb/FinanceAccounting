@@ -10,7 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    //Some fields of entitie which contain state of object
+    //Some fields of entity which contain state of object
     Integer id;
     String email;
     String hashPassword;

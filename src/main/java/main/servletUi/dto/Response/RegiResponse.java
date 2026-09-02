@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegiResponse {
-    private boolean success;
+    private Integer id;
+    private String email;
 }

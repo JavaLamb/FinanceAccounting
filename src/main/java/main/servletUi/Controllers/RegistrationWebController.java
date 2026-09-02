@@ -15,13 +15,7 @@ public class RegistrationWebController implements WebController<RegiRequest, Reg
 
     @Override
     public ApiResponse<RegiResponse> execute(RegiRequest regiRequest) {
-//        if (userService.checkEmail(regiRequest.getUsername())) {
-//            return new RegiResponse();
-//        } else {
-//            userService.createUser(regiRequest.getUsername(), regiRequest.getPassword());
-//            return new RegiResponse(true);
-//        }
-        return null;
+        return new ApiResponse<>(201, userService.webRegistration(regiRequest));
     }
 
     @Override

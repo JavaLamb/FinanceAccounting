@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import main.exceptions.AuthException;
+import main.exceptions.RegistrationException;
 import main.servletUi.dto.ApiResponse;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import tools.jackson.databind.ObjectMapper;
@@ -54,9 +55,12 @@ public class MainServlet extends HttpServlet {
         } catch (AuthException ex) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             om.writeValue(resp.getOutputStream(), Map.of("error", ex.getMessage()));
-        } catch (Exception e) {
+        } catch (RegistrationException ex) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+            om.writeValue(resp.getOutputStream(), Map.of("error", ex.getMessage()));
+        } catch (Exception ex) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write(e.getMessage());
+            resp.getWriter().write(ex.getMessage());
         }
     }
 }

@@ -74,7 +74,7 @@ public class UserDao implements Dao<User, Integer> {
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            throw new RuntimeException("Error with UserDao - findById", e);
+            throw new RuntimeException("Error with UserDao - findByEmail", e);
         }
         return Optional.empty();
     }

@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import main.exceptions.AuthException;
 import main.exceptions.RegistrationException;
 import main.servletUi.dto.ApiResponse;
@@ -47,9 +48,17 @@ public class MainServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+        if(!url.equals("/login") && !url.equals("/registration")){
+            HttpSession session = req.getSession();
+            if(session == null || session.getAttribute("id") == null){
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                om.writeValue(resp.getOutputStream(), Map.of("error", "Необходимо авторизоваться"));
+                return;
+            }
+        }
         try {
             Object request = om.readValue(req.getInputStream(), webController.getRequestClass());
-            ApiResponse<?> response = webController.execute(request);
+            ApiResponse<?> response = webController.execute(request, req);
             resp.setStatus(response.status());
             om.writeValue(resp.getOutputStream(), response.response());
         } catch (AuthException ex) {

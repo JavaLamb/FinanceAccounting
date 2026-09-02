@@ -1,4 +1,4 @@
-package main.servletUi.Response;
+package main.servletUi.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegiResponse {
-    private boolean success;
+public class LoginResponse {
+    private Integer id;
+    private String email;
 }

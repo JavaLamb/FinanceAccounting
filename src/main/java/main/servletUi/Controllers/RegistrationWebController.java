@@ -2,9 +2,10 @@ package main.servletUi.Controllers;
 
 import lombok.AllArgsConstructor;
 import main.service.UserService;
-import main.servletUi.WebController;
-import main.servletUi.Request.RegiRequest;
-import main.servletUi.Response.RegiResponse;
+import main.servletUi.core.WebController;
+import main.servletUi.dto.ApiResponse;
+import main.servletUi.dto.Request.RegiRequest;
+import main.servletUi.dto.Response.RegiResponse;
 import org.springframework.stereotype.Controller;
 
 @AllArgsConstructor
@@ -13,13 +14,14 @@ public class RegistrationWebController implements WebController<RegiRequest, Reg
     private final UserService userService;
 
     @Override
-    public RegiResponse execute(RegiRequest regiRequest) {
-        if (userService.checkEmail(regiRequest.getUsername())) {
-            return new RegiResponse();
-        } else {
-            userService.createUser(regiRequest.getUsername(), regiRequest.getPassword());
-            return new RegiResponse(true);
-        }
+    public ApiResponse<RegiResponse> execute(RegiRequest regiRequest) {
+//        if (userService.checkEmail(regiRequest.getUsername())) {
+//            return new RegiResponse();
+//        } else {
+//            userService.createUser(regiRequest.getUsername(), regiRequest.getPassword());
+//            return new RegiResponse(true);
+//        }
+        return null;
     }
 
     @Override

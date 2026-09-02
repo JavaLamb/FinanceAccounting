@@ -1,4 +1,4 @@
-package main.servletUi;
+package main.servletUi.core;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -6,6 +6,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import main.exceptions.AuthException;
+import main.servletUi.dto.ApiResponse;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import tools.jackson.databind.ObjectMapper;
 
@@ -14,7 +16,6 @@ import java.util.Map;
 
 @WebServlet("/*")
 public class MainServlet extends HttpServlet {
-    @SuppressWarnings("rawtypes")
     private Map<String, WebController> springControllers;
     ObjectMapper om = new ObjectMapper();
 
@@ -47,8 +48,12 @@ public class MainServlet extends HttpServlet {
         }
         try {
             Object request = om.readValue(req.getInputStream(), webController.getRequestClass());
-            Object response = webController.execute(request);
-            om.writeValue(resp.getOutputStream(), response);
+            ApiResponse<?> response = webController.execute(request);
+            resp.setStatus(response.status());
+            om.writeValue(resp.getOutputStream(), response.response());
+        } catch (AuthException ex) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            om.writeValue(resp.getOutputStream(), Map.of("error", ex.getMessage()));
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write(e.getMessage());

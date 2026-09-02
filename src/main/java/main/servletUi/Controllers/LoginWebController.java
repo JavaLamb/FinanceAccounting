@@ -2,9 +2,10 @@ package main.servletUi.Controllers;
 
 import lombok.AllArgsConstructor;
 import main.service.UserService;
-import main.servletUi.WebController;
-import main.servletUi.Request.LoginRequest;
-import main.servletUi.Response.LoginResponse;
+import main.servletUi.core.WebController;
+import main.servletUi.dto.ApiResponse;
+import main.servletUi.dto.Request.LoginRequest;
+import main.servletUi.dto.Response.LoginResponse;
 import org.springframework.stereotype.Controller;
 
 @AllArgsConstructor
@@ -13,11 +14,14 @@ public class LoginWebController implements WebController<LoginRequest, LoginResp
     private final UserService userService;
 
     @Override
-    public LoginResponse execute(LoginRequest request) {
-        return userService.findByEmailService(request.getUsername())
-                .map(user -> userService.checkPassword(request.getPassword(), user))
-                .map(LoginResponse::new)
-                .orElse(new LoginResponse(false));
+    public ApiResponse<LoginResponse> execute(LoginRequest request) {
+//        userService.findByEmailService(request.getUsername())
+//                .map(user -> userService.checkPassword(request.getPassword(), user))
+//                .map(LoginResponse::new)
+//                .orElse(new LoginResponse(false));
+        //ждем из сервиса сущность, переупаковываем её в dto loginresponse, выставляем нужный status и возвращаем
+        //все упакованное в apiresponse +- такой flow.
+        return new ApiResponse<>(200,userService.webAuthorization(request));
     }
 
     @Override

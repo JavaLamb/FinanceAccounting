@@ -2,6 +2,9 @@ package main.service;
 
 import main.dao.UserDao;
 import main.entities.User;
+import main.exceptions.AuthException;
+import main.servletUi.dto.Request.LoginRequest;
+import main.servletUi.dto.Response.LoginResponse;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -31,5 +34,12 @@ public class UserService {
 
     public boolean checkEmail(String email) {
         return userDao.findByEmail(email).isPresent();
+    }
+
+    public LoginResponse webAuthorization(LoginRequest req){
+        return userDao.findByEmail(req.getUsername())
+                .filter(user -> checkPassword(req.getPassword(), user))
+                .map(user -> new LoginResponse(user.getId(),user.getEmail()))
+                .orElseThrow(()-> new AuthException("Неправильный логин или пароль"));
     }
 }

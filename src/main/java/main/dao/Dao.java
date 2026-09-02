@@ -2,14 +2,14 @@ package main.dao;
 
 import java.util.List;
 
-public interface Dao<DOMAIN, ID> {
-    List<DOMAIN> findAll();
+public interface Dao<ENTITY, ID> {
+    List<ENTITY> findAll();
 
-    DOMAIN findById(ID id);
+    ENTITY findById(ID id);
 
-    DOMAIN insert(DOMAIN domain);
+    ENTITY insert(ENTITY entity);
 
-    DOMAIN update(DOMAIN domain);
+    ENTITY update(ENTITY entity);
 
     boolean delete(ID id);
 

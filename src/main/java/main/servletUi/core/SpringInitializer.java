@@ -1,6 +1,5 @@
-package main.servletUi;
+package main.servletUi.core;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;

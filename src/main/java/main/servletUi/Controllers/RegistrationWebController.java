@@ -1,5 +1,6 @@
 package main.servletUi.Controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import main.service.UserService;
 import main.servletUi.core.WebController;
@@ -14,7 +15,7 @@ public class RegistrationWebController implements WebController<RegiRequest, Reg
     private final UserService userService;
 
     @Override
-    public ApiResponse<RegiResponse> execute(RegiRequest regiRequest) {
+    public ApiResponse<RegiResponse> execute(RegiRequest regiRequest, HttpServletRequest req) {
         return new ApiResponse<>(201, userService.webRegistration(regiRequest));
     }
 

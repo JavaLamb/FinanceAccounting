@@ -12,126 +12,134 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mockito.version>5.23.0</mockito.version>
+        <spring.version>7.0.8</spring.version>
+        <jackson.version>3.2.0</jackson.version>
+        <lombok.version>1.18.46</lombok.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
+        <hibernate.version>7.4.7.Final</hibernate.version>
+        <postgresql.version>42.7.11</postgresql.version>
+        <HikariCP.version>7.0.2</HikariCP.version>
+        <liquibase.version>5.0.3</liquibase.version>
+        <junit.version>6.1.0</junit.version>
+        <h2.version>2.4.240</h2.version>
     </properties>
-
     <dependencies>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.11</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-        <!-- Source: https://mvnrepository.com/artifact/org.mindrot/jbcrypt -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
-            <version>0.4</version>
+            <version>${jbcrypt.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- DB -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>4.0.0-M6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>7.0.2</version>
+            <version>${HikariCP.version}</version>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.platform/junit-platform-commons -->
-        <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>6.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.23.0</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.23.0</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.liquibase/liquibase-core -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>5.0.3</version>
+            <version>${liquibase.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/com.h2database/h2 -->
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.4.240</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-context -->
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>7.0.8</version>
+            <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-web -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>7.0.8</version>
+            <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-test -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>7.0.8</version>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+        <!-- Web -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>6.2.0-M2</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
             <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.glassfish.web/jakarta.servlet.jsp.jstl -->
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
             <scope>runtime</scope>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
         <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>3.2.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.46</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok-maven-plugin -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-maven-plugin</artifactId>
-            <version>1.18.20.0</version>
+            <version>${jackson.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

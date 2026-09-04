@@ -1,22 +1,29 @@
 package main.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.mindrot.jbcrypt.BCrypt;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Table(name = "user")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
-    //Some fields of entity which contain state of object
-    Integer id;
-    String email;
-    String hashPassword;
+    private Integer id;
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+    @Column(name = "password", nullable = false)
+    private String hashPassword;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Account> accounts;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TransactionCategory> categories;
 
     public User(String email, String password) {
         this.email = email;
-        this.hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        this.hashPassword = password;
     }
 }

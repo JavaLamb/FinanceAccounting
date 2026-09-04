@@ -38,7 +38,7 @@ public class AccountService {
     }
 
     public void createAccount(User user, AccountType accType, String name, BigDecimal balance) {
-        accountDao.insert(new Account(name, user.getId(), accType, balance));
+        accountDao.insert(new Account(name, user, accType, balance));
     }
 
     public BigDecimal getBalance(int accountId) {

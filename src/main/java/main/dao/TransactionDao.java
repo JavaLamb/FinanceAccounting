@@ -56,7 +56,7 @@ public class TransactionDao implements Dao<Transaction, Integer> {
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmnt.setString(1, category.getTransactionName());
+            pstmnt.setString(1, category.getTransactionCategoryName());
             pstmnt.setInt(2, category.getUserid());
             pstmnt.executeUpdate();
             try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {

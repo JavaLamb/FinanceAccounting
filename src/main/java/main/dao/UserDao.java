@@ -1,6 +1,7 @@
 package main.dao;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.NoArgsConstructor;
 import main.entities.User;
@@ -44,9 +45,13 @@ public class UserDao implements Dao<User, Integer> {
     }
 
     public Optional<User> findByEmail(String email) {
-        User user = em.createNamedQuery("User.findByEmail", User.class)
-                .setParameter("email", email)
-                .getSingleResult();
-        return Optional.of(user);
+        try{
+            User user = em.createNamedQuery("User.findByEmail", User.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 }

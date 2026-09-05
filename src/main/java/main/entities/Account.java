@@ -18,7 +18,7 @@ import java.math.BigDecimal;
         ),
         @NamedQuery(
                 name = "Account.countAllAccountByUserId",
-                query = "select count(a) from Account where a.user.id = :userId"
+                query = "select count(a) from Account a where a.user.id = :userId"
         )
 })
 public class Account {

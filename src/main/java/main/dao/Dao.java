@@ -1,11 +1,12 @@
 package main.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface Dao<ENTITY, ID> {
     List<ENTITY> findAll();
 
-    ENTITY findById(ID id);
+    Optional<ENTITY> findById(ID id);
 
     ENTITY insert(ENTITY entity);
 

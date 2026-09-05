@@ -9,6 +9,12 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NamedQueries({
+        @NamedQuery(
+                name ="TransactionCategory.findAllCategoriesByUser",
+                query = "select tc from TransactionCategory tc where tc.user = :user"
+        )
+})
 public class TransactionCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

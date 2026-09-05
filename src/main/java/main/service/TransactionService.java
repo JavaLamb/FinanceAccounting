@@ -2,7 +2,6 @@ package main.service;
 
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
-import main.dao.Transactional.TransactionManager;
 import main.entities.Account;
 import main.entities.Transaction;
 import main.entities.TransactionCategory;
@@ -18,31 +17,17 @@ import java.util.Scanner;
 public class TransactionService {
     private final TransactionDao transactionDao;
     private final AccountDao accountDao;
-    private final TransactionManager transactionManager;
 
-    public TransactionService(TransactionDao transactionDao, AccountDao accountDao, TransactionManager transactionManager) {
+    public TransactionService(TransactionDao transactionDao, AccountDao accountDao) {
         this.transactionDao = transactionDao;
         this.accountDao = accountDao;
-        this.transactionManager = transactionManager;
     }
 
-    public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount, int selectedCategory) {
-        try {
-            transactionManager.begin();
-            switch (tt) {
-                case INCOME -> income(ownerAccount, amount, selectedCategory);
+    public void createTransaction(TransactionType tt, Account ownerAccount, BigDecimal amount, TransactionCategory category) {
+        Transaction transaction = new Transaction();
+                case INCOME -> income(ownerAccount, amount, category);
 
-                case EXPENSE -> expense(ownerAccount, amount, selectedCategory);
-            }
-            transactionManager.commit();
-        } catch (Exception e) {
-            try {
-                transactionManager.rollback();
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-            throw new RuntimeException(e);
-        }
+                case EXPENSE -> expense(ownerAccount, amount, category);
     }
 
     public void createTransaction(Account ownerAccount, Account recipientAccount, BigDecimal amount, int selectedCategory) {

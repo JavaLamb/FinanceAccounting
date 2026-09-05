@@ -2,22 +2,13 @@ package main.service;
 
 import main.dao.AccountDao;
 import main.dao.TransactionDao;
-import main.dao.Transactional.ConnectionHolder;
 import main.dao.UserDao;
-import main.entities.Account;
-import main.entities.AccountType;
-import main.entities.TransactionCategory;
-import main.entities.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;

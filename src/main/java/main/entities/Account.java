@@ -11,7 +11,16 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
+@NamedQueries({
+        @NamedQuery(
+                name = "Account.findAllAccountsByUserId",
+                query = "select a from Account a where a.user.id = :userId"
+        ),
+        @NamedQuery(
+                name = "Account.countAllAccountByUserId",
+                query = "select count(a) from Account where a.user.id = :userId"
+        )
+})
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

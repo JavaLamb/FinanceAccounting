@@ -11,6 +11,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NamedQueries({
+        @NamedQuery(
+                name ="User.findByEmail",
+                query = "select u from User u where u.email = :email"
+        )
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

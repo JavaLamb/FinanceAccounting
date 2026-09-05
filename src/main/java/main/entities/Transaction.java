@@ -23,7 +23,7 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_account_id", referencedColumnName = "id")
     private Account toAccount;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private TransactionCategory transactionCategory;
     @Column(name = "amount")

@@ -4,13 +4,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.NoArgsConstructor;
 import main.entities.Account;
-import main.entities.AccountType;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
-import javax.swing.text.html.parser.Entity;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

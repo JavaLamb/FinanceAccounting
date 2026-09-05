@@ -1,4 +1,4 @@
-package main.servletUi.core;
+package main.servletUi.core.Router;
 
 import java.util.HashMap;
 import java.util.List;

@@ -57,7 +57,13 @@ public class MainServlet extends HttpServlet {
             }
         }
         try {
-            Object request = om.readValue(req.getInputStream(), webController.getRequestClass());
+            Object request;
+            //in case of emptyRequest for jackson
+            if (req.getContentLengthLong() <= 0) {
+                 request = webController.getRequestClass().getDeclaredConstructor().newInstance();
+            } else {
+                request = om.readValue(req.getInputStream(), webController.getRequestClass());
+            }
             ApiResponse<?> response = webController.execute(request, req);
             resp.setStatus(response.status());
             om.writeValue(resp.getOutputStream(), response.response());

@@ -43,7 +43,7 @@ public class AccountDao implements Dao<Account, Integer> {
         return false;
     }
 
-    public List<Account> findAllByUsersId(Integer id) {
+    public List<Account> findAllByUserId(Integer id) {
         return em.createNamedQuery("Account.findAllAccountsByUserId", Account.class)
                 .setParameter("userId", id)
                 .getResultList();

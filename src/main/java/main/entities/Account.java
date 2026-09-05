@@ -1,31 +1,49 @@
 package main.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "account")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NamedQueries({
+        @NamedQuery(
+                name = "Account.findAllAccountsByUserId",
+                query = "select a from Account a where a.user.id = :userId"
+        ),
+        @NamedQuery(
+                name = "Account.countAllAccountByUserId",
+                query = "select count(a) from Account a where a.user.id = :userId"
+        )
+})
 public class Account {
-    Integer id;
-    String name;
-    BigDecimal balance;
-    Integer userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "name", nullable = false)
+    private String name;
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userid", nullable = false, referencedColumnName = "id")
+    private User user;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     private AccountType accountType;
 
 
-    public Account(String name, Integer userId, AccountType accountType, BigDecimal balance) {
+    public Account(String name, User user, AccountType accountType, BigDecimal balance) {
         this.balance = balance;
         this.name = name;
-        this.userId = userId;
+        this.user = user;
         this.accountType = accountType;
     }
-
 
 
     @Override
@@ -34,7 +52,7 @@ public class Account {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", balance=" + balance +
-                ", userId=" + userId +
+                ", userId=" + user.getId() +
                 ", accountType=" + accountType +
                 '}';
     }

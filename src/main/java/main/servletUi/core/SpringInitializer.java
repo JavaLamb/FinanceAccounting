@@ -3,6 +3,7 @@ package main.servletUi.core;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import main.configuration.DbConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 @WebListener
@@ -13,11 +14,7 @@ public class SpringInitializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
-            context = new AnnotationConfigApplicationContext();
-
-            context.scan("main");
-
-            context.refresh();
+            context = new AnnotationConfigApplicationContext(DbConfig.class);
 
             sce.getServletContext().setAttribute("SpringContext", context);
 

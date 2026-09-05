@@ -26,6 +26,12 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.6.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
@@ -47,7 +53,7 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>4.0.0-M6</version>
+            <version>3.2.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

@@ -20,6 +20,4 @@ class UserServiceTest {
         userDao = mock(UserDao.class);
         userService = new UserService(userDao);
     }
-
-//actually we dont have to test it cause nothing logic here
 }

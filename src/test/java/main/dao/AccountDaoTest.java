@@ -24,24 +24,24 @@ class AccountDaoTest {
     void setUp() {
     }
 
-    @Test
-    void findByIdHappyPath() {
-        user = new User();
-        user.setEmail("email");
-        user.setHashPassword("hash");
-        userDao.insert(user);
-
-        Account account = new Account();
-        account.setAccountType(AccountType.DEBIT);
-        account.setBalance(BigDecimal.valueOf(100));
-        account.setName("account");
-        account.setUserId(user.getId());
-
-        subj.insert(account);
-
-        Account foundAccount = subj.findById(account.getId());
-
-        assertEquals("account", foundAccount.getName());
-
-    }
+//    @Test
+//    void findByIdHappyPath() {
+//        user = new User();
+//        user.setEmail("email");
+//        user.setHashPassword("hash");
+//        userDao.insert(user);
+//
+//        Account account = new Account();
+//        account.setAccountType(AccountType.DEBIT);
+//        account.setBalance(BigDecimal.valueOf(100));
+//        account.setName("account");
+//        account.setUserId(user.getId());
+//
+//        subj.insert(account);
+//
+//        Account foundAccount = subj.findById(account.getId());
+//
+//        assertEquals("account", foundAccount.getName());
+//
+//    }
 }

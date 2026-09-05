@@ -1,20 +1,21 @@
 package main.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import lombok.NoArgsConstructor;
 import main.entities.User;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
+@NoArgsConstructor
 @Repository
 public class UserDao implements Dao<User, Integer> {
-    private final DataSource dataSource;
-
-    public UserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public List<User> findAll() {
@@ -22,34 +23,15 @@ public class UserDao implements Dao<User, Integer> {
     }
 
     @Override
-    public User findById(Integer integer) {
-        try (Connection connection = dataSource.getConnection()) {
-            System.out.println("findById не работает");
-        } catch (SQLException e) {
-            throw new RuntimeException("Error with findById", e);
-        }
-        return null;
+    public Optional<User> findById(Integer id) {
+        User user = em.find(User.class, id);
+        return Optional.ofNullable(user);
     }
 
     @Override
     public User insert(User user) {
-        String sql = "insert into users (email, password) VALUES (?, ?)";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmnt.setString(1, user.getEmail());
-            pstmnt.setString(2, user.getHashPassword());
-            pstmnt.executeUpdate();
-            try (ResultSet generatedKeys = pstmnt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    user.setId(generatedKeys.getInt(1));
-                    return user;
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            throw new RuntimeException("Error with UserDao - insert", e);
-        }
-        return null;
+        em.persist(user);
+        return user;
     }
 
     @Override
@@ -63,19 +45,13 @@ public class UserDao implements Dao<User, Integer> {
     }
 
     public Optional<User> findByEmail(String email) {
-        String sql = "select * from users where email = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement pstmnt = connection.prepareStatement(sql)) {
-            pstmnt.setString(1, email);
-            try (ResultSet rs = pstmnt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(new User(rs.getInt("id"), rs.getString("email"), rs.getString("password")));
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            throw new RuntimeException("Error with UserDao - findByEmail", e);
+        try{
+            User user = em.createNamedQuery("User.findByEmail", User.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 }

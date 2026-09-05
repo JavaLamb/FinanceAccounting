@@ -17,12 +17,15 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @Column(name = "from_account_id")
-    private Integer fromAccountId;
-    @Column(name = "to_account_id")
-    private Integer toAccountId;
-    @Column(name = "category_id")
-    private int categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_account_id", referencedColumnName = "id")
+    private Account fromAccount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_account_id", referencedColumnName = "id")
+    private Account toAccount;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private TransactionCategory transactionCategory;
     @Column(name = "amount")
     private BigDecimal amount;
     @Column(name = "date_time")
@@ -30,38 +33,38 @@ public class Transaction {
     @Transient
     private TransactionType transactionType;
 
-    public Transaction(TransactionType transactionType, Integer fromAccountId, Integer toAccountId, int categoryId, BigDecimal amount) {
+    public Transaction(TransactionType transactionType, Account fromAccount, Account toAccount, TransactionCategory transactionCategory, BigDecimal amount) {
         this.transactionType = transactionType;
-        this.fromAccountId = fromAccountId;
-        this.toAccountId = toAccountId;
-        this.categoryId = categoryId;
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
+        this.transactionCategory = transactionCategory;
         this.amount = amount;
     }
 
-    public Transaction(TransactionType transactionType, Integer AccountId, int categoryId, BigDecimal amount) {
+    public Transaction(TransactionType transactionType, Account AccountId, TransactionCategory transactionCategory, BigDecimal amount) {
         switch (transactionType) {
-            case TransactionType.INCOME -> this.toAccountId = AccountId;
-            case TransactionType.EXPENSE -> this.fromAccountId = AccountId;
+            case TransactionType.INCOME -> this.toAccount = AccountId;
+            case TransactionType.EXPENSE -> this.fromAccount = AccountId;
         }
         this.transactionType = transactionType;
-        this.categoryId = categoryId;
+        this.transactionCategory = transactionCategory;
         this.amount = amount;
     }
 
 
-    public Transaction(int id, Integer fromAccountId, Integer toAccountId, int categoryId, BigDecimal amount, LocalDateTime dateTime) {
+    public Transaction(int id, Account fromAccount, Account toAccount, TransactionCategory transactionCategory, BigDecimal amount, LocalDateTime dateTime) {
         this.id = id;
-        this.fromAccountId = fromAccountId;
-        this.toAccountId = toAccountId;
-        this.categoryId = categoryId;
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
+        this.transactionCategory = transactionCategory;
         this.amount = amount;
         this.dateTime = dateTime;
     }
 
     public TransactionType getTransactionType() {
-        if (fromAccountId != null && toAccountId != null) {
+        if (fromAccount != null && toAccount != null) {
             return TransactionType.TRANSFER;
-        } else if (fromAccountId == null && toAccountId != null) {
+        } else if (fromAccount == null && toAccount != null) {
             return TransactionType.INCOME;
         } else {
             return TransactionType.EXPENSE;

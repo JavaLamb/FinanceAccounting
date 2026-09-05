@@ -17,7 +17,7 @@ public class TransactionCategory {
     @Column(name = "transaction_category_name")
     private String transactionCategoryName;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userid", nullable = false)
+    @JoinColumn(name = "userid", nullable = false, referencedColumnName = "id")
     private User user;
 
     public TransactionCategory(String transactionCategoryName, Integer id) {

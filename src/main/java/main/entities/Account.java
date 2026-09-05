@@ -22,7 +22,7 @@ public class Account {
     @Column(name = "balance", nullable = false)
     private BigDecimal balance;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userid", nullable = false)
+    @JoinColumn(name = "userid", nullable = false, referencedColumnName = "id")
     private User user;
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)

@@ -1,0 +1,12 @@
+spring:
+  liquibase:
+    change-log: classpath:db.changelog-master.yaml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: password
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate

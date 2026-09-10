@@ -4,7 +4,7 @@ databaseChangeLog:
       author: me
       changes:
         - createTable:
-            tableName: users
+            tableName: user
             columns:
               - column:
                   name: id
@@ -31,7 +31,7 @@ databaseChangeLog:
       author: me
       changes:
         - createTable:
-            tableName: accounts
+            tableName: account
             columns:
               - column:
                   name: id
@@ -62,11 +62,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addForeignKeyConstraint:
-            baseTableName: accounts
+            baseTableName: account
             baseColumnNames: userid
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
-            constraintName: fk_accounts_users
+            constraintName: fk_accounts_user
 
   - changeSet:
       id: 3-create-transaction-category
@@ -96,16 +96,16 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: transaction_category
             baseColumnNames: userid
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
-            constraintName: fk_category_users
+            constraintName: fk_category_user
 
   - changeSet:
-      id: 4-create-transactions
+      id: 4-create-transaction
       author: me
       changes:
         - createTable:
-            tableName: transactions
+            tableName: transaction
             columns:
               - column:
                   name: id
@@ -137,40 +137,40 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addForeignKeyConstraint:
-            baseTableName: transactions
+            baseTableName: transaction
             baseColumnNames: from_account_id
-            referencedTableName: accounts
+            referencedTableName: account
             referencedColumnNames: id
-            constraintName: fk_transactions_from_account
+            constraintName: fk_transaction_from_account
         - addForeignKeyConstraint:
-            baseTableName: transactions
+            baseTableName: transaction
             baseColumnNames: to_account_id
-            referencedTableName: accounts
+            referencedTableName: account
             referencedColumnNames: id
-            constraintName: fk_transactions_to_account
+            constraintName: fk_transaction_to_account
         - addForeignKeyConstraint:
-            baseTableName: transactions
+            baseTableName: transaction
             baseColumnNames: category_id
             referencedTableName: transaction_category
             referencedColumnNames: id
-            constraintName: fk_transactions_category
+            constraintName: fk_transaction_category
 
   - changeSet:
       id: 2-add-default-balance
       author: me
       changes:
         - addDefaultValue:
-            tableName: accounts
+            tableName: account
             columnName: balance
             columnDataType: BIGINT
             defaultValue: 0
 
   - changeSet:
-      id: 5-add-default-datetime-transactions
+      id: 5-add-default-datetime-transaction
       author: me
       changes:
         - addDefaultValue:
-            tableName: transactions
+            tableName: transaction
             columnName: date_time
             columnDataType: TIMESTAMP
             defaultValueComputed: current_datetime()

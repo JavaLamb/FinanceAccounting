@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @NamedQueries({
         @NamedQuery(
-                name ="TransactionCategory.findAllCategoriesByUser",
+                name = "TransactionCategory.findAllCategoriesByUser",
                 query = "select tc from TransactionCategory tc where tc.user = :user"
         )
 })
@@ -20,10 +20,16 @@ public class TransactionCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-    @Column(name = "transaction_category_name")
+
+    @Column(name = "transaction_name")
     private String transactionCategoryName;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userid", nullable = false, referencedColumnName = "id")
+    @JoinColumn(
+            name = "userid",
+            nullable = false,
+            referencedColumnName = "id"
+    )
     private User user;
 
     public TransactionCategory(String transactionCategoryName, Integer id) {

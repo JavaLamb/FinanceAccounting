@@ -1,28 +1,24 @@
 package main.service;
 
-import main.dao.UserDao;
+import lombok.RequiredArgsConstructor;
 import main.entities.User;
 import main.exceptions.AuthException;
 import main.exceptions.RegistrationException;
+import main.repositories.UserRepository;
 import main.servletUi.dto.Request.LoginRequest;
 import main.servletUi.dto.Request.RegiRequest;
-import main.servletUi.dto.Response.LoginResponse;
-import main.servletUi.dto.Response.RegiResponse;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class UserService {
-    private final UserDao userDao;
-
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
-    }
+    private final UserRepository userRepository;
 
     public Optional<User> findByEmailService(String email) {
-        return userDao.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 
     public boolean checkPassword(String password, User user) {
@@ -32,23 +28,28 @@ public class UserService {
 
     public User createUser(String email, String password) {
         User newUser = new User(email, password);
-        return userDao.insert(newUser);
+        return userRepository.save(newUser);
     }
 
     public boolean checkEmail(String email) {
-        return userDao.findByEmail(email).isPresent();
-    }
-    public RegiResponse webRegistration(RegiRequest req){
-        userDao.findByEmail(req.getUsername())
-                .ifPresent(_ -> {throw new RegistrationException("Пользователь с данным email уже существует");});
-        User user = userDao.insert(new User(req.getUsername(), req.getPassword()));
-        return new RegiResponse(user.getId(),user.getEmail());
+        return userRepository.findByEmail(email).isPresent();
     }
 
-    public LoginResponse webAuthorization(LoginRequest req){
-        return userDao.findByEmail(req.getUsername())
+    public User registration(RegiRequest request) {
+        userRepository.findByEmail(request.getUsername())
+                .ifPresent(_ -> {
+                    throw new RegistrationException("Пользователь с данным email уже существует");
+                });
+        return userRepository.save(new User(request.getUsername(), BCrypt.hashpw(request.getPassword(),BCrypt.gensalt())));
+    }
+
+    public User authorization(LoginRequest req) {
+        return userRepository.findByEmail(req.getUsername())
                 .filter(user -> checkPassword(req.getPassword(), user))
-                .map(user -> new LoginResponse(user.getId(),user.getEmail()))
-                .orElseThrow(()-> new AuthException("Неправильный логин или пароль"));
+                .orElseThrow(() -> new AuthException("Неправильный логин или пароль"));
+    }
+
+    public boolean isExistByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 }

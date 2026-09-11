@@ -3,11 +3,13 @@ package main.servletUi.dto.Response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Accessors(chain = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegiResponse {
-    private Long id;
-    private String email;
+public class UserResponse {
+    Long id;
+    String email;
 }

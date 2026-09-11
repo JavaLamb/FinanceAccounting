@@ -1,4 +1,4 @@
-package main.servletUi.dto.Request;
+package main.dto.Request;
 
 import lombok.Data;
 

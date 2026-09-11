@@ -1,7 +1,7 @@
 package main.converters;
 
 import main.entities.User;
-import main.servletUi.dto.Response.UserResponse;
+import main.dto.Response.UserResponse;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

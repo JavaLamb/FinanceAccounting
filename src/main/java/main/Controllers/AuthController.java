@@ -1,7 +1,6 @@
-package main.servletUi.Controllers;
+package main.Controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import main.converters.UserToUserResponseConverter;
 import main.entities.User;
@@ -9,9 +8,9 @@ import main.exceptions.AuthException;
 import main.exceptions.RegistrationException;
 import main.repositories.UserRepository;
 import main.service.UserService;
-import main.servletUi.dto.Request.LoginRequest;
-import main.servletUi.dto.Request.RegiRequest;
-import main.servletUi.dto.Response.UserResponse;
+import main.dto.Request.LoginRequest;
+import main.dto.Request.RegiRequest;
+import main.dto.Response.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +26,6 @@ public class AuthController {
     private final UserService userService;
     private final UserToUserResponseConverter converter;
 
-    @Transactional
     @PostMapping("/registration")
     public ResponseEntity<UserResponse> registration(@RequestBody RegiRequest request) {
         try {
@@ -38,12 +36,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authorization(@RequestBody LoginRequest request, HttpServletRequest req) {
+    public ResponseEntity<Void> authorization(@RequestBody LoginRequest loginRequest, HttpServletRequest req) {
         try {
-            User user = userService.authorization(request);
+            User user = userService.authorization(loginRequest);
             req.getSession().setAttribute("id", user.getId());
             return noContent().build();
-        }catch(AuthException e){
+        } catch (AuthException e) {
             return status(HttpStatus.UNAUTHORIZED).build();
         }
     }

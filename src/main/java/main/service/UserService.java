@@ -1,12 +1,13 @@
 package main.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import main.entities.User;
 import main.exceptions.AuthException;
 import main.exceptions.RegistrationException;
 import main.repositories.UserRepository;
-import main.servletUi.dto.Request.LoginRequest;
-import main.servletUi.dto.Request.RegiRequest;
+import main.dto.Request.LoginRequest;
+import main.dto.Request.RegiRequest;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +36,13 @@ public class UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
+    @Transactional
     public User registration(RegiRequest request) {
         userRepository.findByEmail(request.getUsername())
                 .ifPresent(_ -> {
                     throw new RegistrationException("Пользователь с данным email уже существует");
                 });
-        return userRepository.save(new User(request.getUsername(), BCrypt.hashpw(request.getPassword(),BCrypt.gensalt())));
+        return userRepository.save(new User(request.getUsername(), BCrypt.hashpw(request.getPassword(), BCrypt.gensalt())));
     }
 
     public User authorization(LoginRequest req) {

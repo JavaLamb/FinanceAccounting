@@ -1,4 +1,4 @@
-package main.servletUi.dto.Response;
+package main.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

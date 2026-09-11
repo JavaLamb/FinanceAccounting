@@ -1,4 +1,4 @@
-package main.servletUi.dto.Response;
+package main.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 
 @Getter
 @AllArgsConstructor
-public class ShowAccountsResponse {
-    Integer id;
+public class AccountsResponse {
+    Long id;
     String name;
     BigDecimal balance;
     AccountType accountType;

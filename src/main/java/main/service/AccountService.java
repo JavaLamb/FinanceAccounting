@@ -42,6 +42,10 @@ public class AccountService {
         accountRepository.save(new Account(name, user, accType, balance));
     }
 
+    public List<Account> getAllByUserId(long id) {
+        return accountRepository.findByUserId(id);
+    }
+
 //    public BigDecimal getBalance(int accountId) {
 //        return accountDao.findById(accountId).getBalance();
 //    }

@@ -26,20 +26,23 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "balance", nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid", nullable = false, referencedColumnName = "id")
     private User user;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private AccountType accountType;
 
 
-    public Account(String name, User user, AccountType accountType, BigDecimal balance) {
-        this.balance = balance;
+    public Account(String name, User user, AccountType accountType) {
         this.name = name;
         this.user = user;
         this.accountType = accountType;

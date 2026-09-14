@@ -22,7 +22,6 @@ import static org.springframework.http.ResponseEntity.*;
 @RequiredArgsConstructor
 @RestController
 public class AuthController {
-    private final UserRepository userRepository;
     private final UserService userService;
     private final UserToUserResponseConverter converter;
 
@@ -44,5 +43,11 @@ public class AuthController {
         } catch (AuthException e) {
             return status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest req){
+        req.getSession().invalidate();
+        return noContent().build();
     }
 }

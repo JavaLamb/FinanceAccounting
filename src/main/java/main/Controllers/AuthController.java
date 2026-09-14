@@ -45,4 +45,10 @@ public class AuthController {
             return status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest req){
+        req.getSession().invalidate();
+        return noContent().build();
+    }
 }

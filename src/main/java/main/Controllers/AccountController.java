@@ -10,10 +10,7 @@ import main.exceptions.AccountException;
 import main.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -21,13 +18,14 @@ import java.util.List;
 
 import static org.springframework.http.ResponseEntity.*;
 
+@RequestMapping("/accounts")
 @RequiredArgsConstructor
 @RestController
 public class AccountController {
     private final AccountService accountService;
     private final AccountToAccountResponseConverter converter;
 
-    @GetMapping("/accounts")
+    @GetMapping
     public ResponseEntity<List<AccountsResponse>> getAccounts(HttpServletRequest request) {
         long id = (long) request.getSession().getAttribute("id");
         List<AccountsResponse> list = accountService.getAllByUserId(id)
@@ -37,7 +35,7 @@ public class AccountController {
         return ok(list);
     }
 
-    @PostMapping("/accounts")
+    @PostMapping
     public ResponseEntity<AccountsResponse> createAccount(@RequestBody CreateAccountRequest dto, HttpServletRequest request){
         try{
             long id = (long) request.getSession().getAttribute("id");
@@ -52,4 +50,9 @@ public class AccountController {
             return status(HttpStatus.BAD_REQUEST).build();
         }
     }
+    //надо сначала spring security подключить чтобы не делать двойной запрос к БД для проверки прав пользователя.
+//    @GetMapping("/{id}")
+//    public ResponseEntity<AccountsResponse> getAccountById(@PathVariable("id") long id, HttpServletRequest request){
+//        accountService.findByIdService();
+//    }
 }

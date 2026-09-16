@@ -174,3 +174,16 @@ databaseChangeLog:
             columnName: date_time
             columnDataType: TIMESTAMP
             defaultValueComputed: current_datetime()
+  - changeSet:
+      id: 6-add-mandatory-column-with-default
+      author: me
+      changes:
+        - addColumn:
+            tableName: user
+            columns:
+              - column:
+                  name: role
+                  type: varchar(255)
+                  defaultValue: "USER"
+                  constraints:
+                    nullable: false

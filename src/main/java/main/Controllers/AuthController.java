@@ -6,7 +6,6 @@ import main.converters.UserToUserResponseConverter;
 import main.entities.User;
 import main.exceptions.AuthException;
 import main.exceptions.RegistrationException;
-import main.repositories.UserRepository;
 import main.service.UserService;
 import main.dto.Request.LoginRequest;
 import main.dto.Request.RegiRequest;

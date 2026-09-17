@@ -24,8 +24,9 @@ public class User {
     private List<Account> accounts;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TransactionCategory> categories;
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private UserRole userRole;
+    private UserRole userRole = UserRole.USER;
 
     public User(String email, String password) {
         this.email = email;

@@ -1,6 +1,12 @@
 package main.entities;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 public enum UserRole {
     USER,
-    ADMIN
+    ADMIN;
+
+    public SimpleGrantedAuthority toAuthority(){
+        return new SimpleGrantedAuthority("ROLE_" + this.name());
+    }
 }

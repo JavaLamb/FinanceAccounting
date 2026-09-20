@@ -11,8 +11,8 @@ import main.repositories.AccountRepository;
 import main.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -33,9 +33,15 @@ public class AccountService {
         return result < accountLimit;
     }
 
-    public Optional<Account> findByIdService(long id) {
-        return accountRepository.findById(id);
+    public Account findByIdService(long accountId, long userId) throws AccountNotFoundException {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(AccountNotFoundException::new);
+        if (account.getUser().getId() == userId) {
+            return account;
+        }
+        throw new AccountException("Access not allowed");
     }
+
 
     public boolean isExist(long id) {
         return accountRepository.findById(id).isPresent();
@@ -55,7 +61,4 @@ public class AccountService {
         return accountRepository.findByUserId(id);
     }
 
-//    public BigDecimal getBalance(int accountId) {
-//        return accountDao.findById(accountId).getBalance();
-//    }
 }

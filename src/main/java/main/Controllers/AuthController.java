@@ -1,6 +1,7 @@
 package main.Controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import main.converters.UserToUserResponseConverter;
 import main.exceptions.RegistrationException;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +29,7 @@ public class AuthController {
     private final UserService userService;
     private final UserToUserResponseConverter converter;
     private final AuthenticationManager authenticationManager;
+    private final SecurityContextRepository securityContextRepository;
 
     @PostMapping("/registration")
     public ResponseEntity<UserResponse> registration(@RequestBody RegiRequest request) {
@@ -38,17 +41,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> authorization(@RequestBody LoginRequest loginRequest, HttpServletRequest req) {
+    public ResponseEntity<Void> authorization(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
-        return noContent().build();
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest req){
-        req.getSession().invalidate();
+        securityContextRepository.saveContext(context, request, response);
         return noContent().build();
     }
 }

@@ -52,6 +52,15 @@ public class AccountController {
             return status(HttpStatus.BAD_REQUEST).build();
         }
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAccountById(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails){
+        try {
+            accountService.deactivateAccount(accountId, userDetails.getId());
+            return ok().build();
+        } catch (AccountException e) {
+            return status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<AccountsResponse> getAccountById(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails) {

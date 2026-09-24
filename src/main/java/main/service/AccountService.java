@@ -6,7 +6,6 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
 import main.exceptions.AccountException;
-import main.exceptions.AuthException;
 import main.repositories.AccountRepository;
 import main.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -21,20 +20,21 @@ public class AccountService {
     private final UserRepository userRepository;
     int accountLimit = 5;
 
-    public List<Account> findAllByUserId(long Userid) {
-        return accountRepository.findByUserId(Userid);
-    }
-
     public boolean canCreateMoreAccount(long id) {
-        long result = accountRepository.countAllByUserId(id);
-        if (result < 0) {
-            return false;
-        }
-        return result < accountLimit;
+        return accountRepository.countAllByUserIdAndActiveTrue(id) < accountLimit;
     }
 
+    @Transactional
+    public void deactivateAccount(long accountId, long userId){
+        int res = accountRepository.deactivateByIdAndUserId(accountId, userId);
+        if(res == 0){
+            throw new AccountException("nothing changed");
+        }
+    }
+
+    @Transactional
     public Account findByIdService(long accountId, long userId) throws AccountNotFoundException {
-        Account account = accountRepository.findById(accountId)
+        Account account = accountRepository.findByIdAndActiveTrue(accountId)
                 .orElseThrow(AccountNotFoundException::new);
         if (account.getUser().getId() == userId) {
             return account;
@@ -42,23 +42,17 @@ public class AccountService {
         throw new AccountException("Access not allowed");
     }
 
-
-    public boolean isExist(long id) {
-        return accountRepository.findById(id).isPresent();
-    }
-
     @Transactional
     public Account createAccount(String name, long userId, AccountType accType) {
-        User currentUser = userRepository.findById(userId)
-                .orElseThrow(() -> new AuthException("User not found"));
-        if (!canCreateMoreAccount(currentUser.getId())) {
+        if (!canCreateMoreAccount(userId)) {
             throw new AccountException("Account limit exceeded");
         }
-        return accountRepository.save(new Account(name, currentUser, accType));
+        User user = userRepository.getReferenceById(userId);
+        return accountRepository.save(new Account(name, user, accType));
     }
 
-    public List<Account> getAllByUserId(long id) {
-        return accountRepository.findByUserId(id);
+    public List<Account> getAllByUserId(long userId) {
+        return accountRepository.findByUserIdAndActiveTrue(userId);
     }
 
 }

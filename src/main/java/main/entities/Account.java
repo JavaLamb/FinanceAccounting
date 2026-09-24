@@ -31,6 +31,9 @@ public class Account {
     @Column(name = "type", nullable = false)
     private AccountType accountType;
 
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
 
     public Account(String name, User user, AccountType accountType) {
         this.name = name;

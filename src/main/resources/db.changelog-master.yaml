@@ -187,3 +187,23 @@ databaseChangeLog:
                   defaultValue: "USER"
                   constraints:
                     nullable: false
+  - changeSet:
+      id: 7-add_active_column_to_account
+      author: me
+      changes:
+        - addColumn:
+            tableName: account
+            columns:
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+        - update:
+            tableName: account
+            columns:
+              - column:
+                  name: active
+                  valueBoolean: true
+            where: active IS NULL

@@ -61,6 +61,13 @@ public class Transaction {
         this.dateTime = dateTime;
     }
 
+    public Transaction(TransactionType transactionType, Account toAccount, long transactionCategoryId, BigDecimal amount) {
+        this.transactionType = transactionType;
+        this.toAccount = toAccount;
+        this.transactionCategoryId = transactionCategoryId;
+
+    }
+
     public TransactionType getTransactionType() {
         if (fromAccount != null && toAccount != null) {
             return TransactionType.TRANSFER;

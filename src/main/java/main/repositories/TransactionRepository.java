@@ -13,7 +13,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
                 SELECT t FROM Transaction t
                 JOIN FETCH t.transactionCategory
-                WHERE t.fromAccount.id = :accountId OR t.toAccount.id = :accountId
+                LEFT JOIN t.fromAccount fa
+                LEFT JOIN t.toAccount ta
+                WHERE (fa.id = :accountId OR ta.id = :accountId)
+                AND (fa.user.id = :userId OR ta.user.id = :userId)
             """)
-    List<Transaction> findAllByAccountIdWithCategory(@Param("accountId") long accountId);
+    List<Transaction> findAllByAccountIdAndUserIdWithCategory(@Param("accountId") long accountId, @Param("userId") long userId);
 }

@@ -64,7 +64,7 @@ public class Transaction {
     public TransactionType getTransactionType() {
         if (fromAccount != null && toAccount != null) {
             return TransactionType.TRANSFER;
-        } else if (fromAccount == null && toAccount != null) {
+        } else if (fromAccount == null) {
             return TransactionType.INCOME;
         } else {
             return TransactionType.EXPENSE;

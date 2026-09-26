@@ -1,0 +1,19 @@
+package main.repositories;
+
+import main.entities.Transaction;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    @Query("""
+                SELECT t FROM Transaction t
+                JOIN FETCH t.transactionCategory
+                WHERE t.fromAccount.id = :accountId OR t.toAccount.id = :accountId
+            """)
+    List<Transaction> findAllByAccountIdWithCategory(@Param("accountId") long accountId);
+}

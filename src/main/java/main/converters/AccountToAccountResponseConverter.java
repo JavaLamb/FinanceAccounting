@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountToAccountResponseConverter implements Converter<Account, AccountsResponse> {
     @Override
-    public AccountsResponse convert(Account account) {
-        return new AccountsResponse(account.getId(), account.getName(), account.getBalance(),account.getAccountType());
+    public AccountsResponse convert(Account source) {
+        return new AccountsResponse(source.getId(), source.getName(), source.getBalance(),source.getAccountType());
     }
 }

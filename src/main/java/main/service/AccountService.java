@@ -18,7 +18,7 @@ import java.util.List;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
-    int accountLimit = 5;
+    private final int accountLimit = 5;
 
     public boolean canCreateMoreAccount(long id) {
         return accountRepository.countAllByUserIdAndActiveTrue(id) < accountLimit;

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -19,4 +20,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                 AND (fa.user.id = :userId OR ta.user.id = :userId)
             """)
     List<Transaction> findAllByAccountIdAndUserIdWithCategory(@Param("accountId") long accountId, @Param("userId") long userId);
+
+    @Query("""
+                SELECT t FROM Transaction t
+                LEFT JOIN t.fromAccount fa
+                LEFT JOIN t.toAccount ta
+                WHERE t.id = :transactionId
+                AND (fa.user.id = :userId OR ta.user.id = :userId)
+            """)
+    Optional<Transaction> findByIdAndUserId(@Param("transactionId") long transactionId, @Param("userId") long userId);
 }

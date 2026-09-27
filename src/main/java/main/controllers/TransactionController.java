@@ -29,8 +29,8 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final TransactionToTransactionResponseConverter converter;
 
-    @GetMapping("/accounts/{id}")
-    public ResponseEntity<List<TransactionResponse>> getTransactionsByAccount(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    @GetMapping("/accounts/{accountId}")
+    public ResponseEntity<List<TransactionResponse>> getTransactionsByAccount(@PathVariable("accountId") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails){
         try {
             long userId = userDetails.getId();
             List<TransactionResponse> transactionList = transactionService.findAllByAccId(accountId, userId)
@@ -43,8 +43,8 @@ public class TransactionController {
         }
     }
 
-    @PostMapping("/accounts/{id}")
-    public ResponseEntity<TransactionResponse> createRegularTransaction(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody CreateRegularTransactionRequest dto){
+    @PostMapping("/accounts/{accountId}")
+    public ResponseEntity<TransactionResponse> createRegularTransaction(@PathVariable("accountId") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody CreateRegularTransactionRequest dto){
         try {
             long userId = userDetails.getId();
             Transaction newTransaction = transactionService.createRegularTransaction(dto.getTransactionType(),dto.getCategoryId(),dto.getAmount(), userId, accountId);
@@ -60,9 +60,15 @@ public class TransactionController {
         }
     }
 
-//    @PostMapping("/accounts/{id}/transfer")
-//    public ResponseEntity<TransactionResponse> createTransferTransaction(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails){
-//
-//    }
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponse> getTransactionById(@PathVariable("transactionId") long transactionId, @AuthenticationPrincipal CustomUserDetails userDetails){
+        try {
+            long userId = userDetails.getId();
+            Transaction transaction = transactionService.getTransactionById(userId, transactionId);
+            return ok(converter.convert(transaction));
+        } catch (AccessNotAllowed e) {
+            return status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
 }

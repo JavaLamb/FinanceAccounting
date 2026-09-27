@@ -35,11 +35,11 @@ public class TransactionService {
         }
         return list;
     }
-//    @Transactional
-//    public Transaction createTransactionByAccountIdAndUserId(long userId, long accountId) {
-//        Account account = accountRepository.getReferenceById(accountId);
-//
-//    }
+
+    @Transactional
+    public Transaction getTransactionById(long userId, long transactionId){
+        return transactionRepository.findByIdAndUserId(transactionId, userId).orElseThrow(AccessNotAllowed::new);
+    }
 
     @Transactional
     public Transaction createRegularTransaction(TransactionType transactionType, long categoryId, BigDecimal amount, long userId, long accountId) throws AccountNotFoundException {

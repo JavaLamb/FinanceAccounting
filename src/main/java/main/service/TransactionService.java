@@ -60,8 +60,25 @@ public class TransactionService {
     }
 
     public Transaction createExpense(Category category, BigDecimal amount, Account account){
-        if(account.getBalance().compareTo(amount) < 0) throw new BalanceException("balance too low");
+        if(!isBalanceValid(account, amount)) throw new BalanceException("balance too low");
         account.setBalance(account.getBalance().subtract(amount));
         return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
+    }
+    @Transactional
+    public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) throws AccountNotFoundException {
+        Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId).orElseThrow(AccountNotFoundException::new);
+        Category category = categoryRepository.findByIdAndUserId(categoryId, userId).orElseThrow(AccessNotAllowed::new);
+        if(fromAccount.getUser().getId() != userId) throw new AccessNotAllowed("nope");
+        if(!isBalanceValid(fromAccount, amount)) throw new BalanceException("balance too low");
+        Account toAccount = accountRepository.findByIdAndActiveTrue(toAccountId).orElseThrow(AccountNotFoundException::new);
+
+        fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
+        toAccount.setBalance(toAccount.getBalance().add(amount));
+
+        return transactionRepository.save(new Transaction(TransactionType.TRANSFER, fromAccount, toAccount, category, amount));
+    }
+
+    private boolean isBalanceValid(Account account, BigDecimal amount){
+        return account.getBalance().compareTo(amount) >= 0;
     }
 }

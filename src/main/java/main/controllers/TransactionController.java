@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import main.config.CustomUserDetails;
 import main.converters.TransactionToTransactionResponseConverter;
 import main.dto.Request.CreateRegularTransactionRequest;
+import main.dto.Request.CreateTransferRequest;
 import main.dto.Response.TransactionResponse;
 import main.entities.Transaction;
 import main.exceptions.AccessNotAllowed;
@@ -68,6 +69,21 @@ public class TransactionController {
             return ok(converter.convert(transaction));
         } catch (AccessNotAllowed e) {
             return status(HttpStatus.NOT_FOUND).build();
+        } catch (BalanceException e){
+            return status(HttpStatus.UNPROCESSABLE_CONTENT).build();
+        }
+    }
+
+    @PostMapping("/accounts/{accountId}/transfer")
+    public ResponseEntity<TransactionResponse> createTransfer(@PathVariable("accountId") long fromAccountId, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody CreateTransferRequest dto){
+        try {
+            long userId = userDetails.getId();
+            Transaction newTransaction = transactionService.createTransfer(dto.getToAccountId(), dto.getAmount(), dto.getCategoryId(), fromAccountId, userId);
+            return ok(converter.convert(newTransaction));
+        } catch (AccountNotFoundException e) {
+            return status(HttpStatus.BAD_REQUEST).build();
+        } catch (AccessNotAllowed e) {
+            return status(HttpStatus.FORBIDDEN).build();
         }
     }
 

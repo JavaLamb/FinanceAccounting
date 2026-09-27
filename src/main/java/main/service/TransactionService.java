@@ -7,6 +7,7 @@ import main.entities.Category;
 import main.entities.Transaction;
 import main.entities.TransactionType;
 import main.exceptions.AccessNotAllowed;
+import main.exceptions.BalanceException;
 import main.exceptions.TransactionNotFound;
 import main.repositories.AccountRepository;
 import main.repositories.CategoryRepository;
@@ -47,19 +48,20 @@ public class TransactionService {
         if(category.getUser().getId() != userId) throw new AccessNotAllowed("nope");
         if(account.getUser().getId() != userId) throw new AccessNotAllowed("nope");
         if(transactionType == TransactionType.INCOME){
-            return createIncome(category, amount, accountId, account);
+            return createIncome(category, amount, account);
         }else{
-            throw new RuntimeException("runtime");
-            //            return createExpense(transactionCategory, amount, accountId);
+            return createExpense(category, amount, account);
         }
     }
 
-    public Transaction createIncome(Category category, BigDecimal amount, long accountId, Account account){
+    public Transaction createIncome(Category category, BigDecimal amount, Account account){
         account.setBalance(account.getBalance().add(amount));
         return transactionRepository.save(new Transaction(TransactionType.INCOME, account, category, amount));
     }
-//
-//    public Transaction createExpense(Category transactionCategory, BigDecimal amount, long accountId){
-//        //тут нужно проверить баланс, можем ли мы совершить такой расход с аккаунта
-//    }
+
+    public Transaction createExpense(Category category, BigDecimal amount, Account account){
+        if(account.getBalance().compareTo(amount) < 0) throw new BalanceException("balance too low");
+        account.setBalance(account.getBalance().subtract(amount));
+        return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
+    }
 }

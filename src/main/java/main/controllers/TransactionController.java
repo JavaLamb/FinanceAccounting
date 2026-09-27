@@ -7,6 +7,7 @@ import main.dto.Request.CreateRegularTransactionRequest;
 import main.dto.Response.TransactionResponse;
 import main.entities.Transaction;
 import main.exceptions.AccessNotAllowed;
+import main.exceptions.BalanceException;
 import main.exceptions.TransactionNotFound;
 import main.service.TransactionService;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,8 @@ public class TransactionController {
             return status(HttpStatus.FORBIDDEN).build();
         } catch (TransactionNotFound e){
             return status(HttpStatus.CONFLICT).build();
+        } catch (BalanceException e){
+            return status(HttpStatus.UNPROCESSABLE_CONTENT).build();
         }
     }
 

@@ -2,6 +2,7 @@ package main.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class Transaction {
     @Column(name = "amount")
     private BigDecimal amount;
     @Column(name = "date_time")
+    @CreationTimestamp
     private LocalDateTime dateTime;
     @Transient
     private TransactionType transactionType;

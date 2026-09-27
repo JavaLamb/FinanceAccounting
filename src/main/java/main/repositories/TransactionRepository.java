@@ -12,7 +12,7 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     @Query("""
                 SELECT t FROM Transaction t
-                JOIN FETCH t.transactionCategory
+                JOIN FETCH t.category
                 LEFT JOIN t.fromAccount fa
                 LEFT JOIN t.toAccount ta
                 WHERE (fa.id = :accountId OR ta.id = :accountId)

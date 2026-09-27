@@ -35,8 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/registration", "/logout").permitAll()
-                        .requestMatchers("/accounts/**").hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
-                        .requestMatchers("/transactions/**").hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name()))
+                        .requestMatchers("/accounts/**", "/transactions/**", "/categories/**" ).hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name()))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_NO_CONTENT)))

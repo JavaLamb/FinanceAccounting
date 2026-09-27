@@ -25,7 +25,7 @@ public class Transaction {
     private Account toAccount;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private TransactionCategory transactionCategory;
+    private Category category;
     @Column(name = "amount")
     private BigDecimal amount;
     @Column(name = "date_time")
@@ -33,39 +33,32 @@ public class Transaction {
     @Transient
     private TransactionType transactionType;
 
-    public Transaction(TransactionType transactionType, Account fromAccount, Account toAccount, TransactionCategory transactionCategory, BigDecimal amount) {
+    public Transaction(TransactionType transactionType, Account fromAccount, Account toAccount, Category category, BigDecimal amount) {
         this.transactionType = transactionType;
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
-        this.transactionCategory = transactionCategory;
+        this.category = category;
         this.amount = amount;
     }
 
-    public Transaction(TransactionType transactionType, Account AccountId, TransactionCategory transactionCategory, BigDecimal amount) {
+    public Transaction(TransactionType transactionType, Account AccountId, Category category, BigDecimal amount) {
         switch (transactionType) {
             case TransactionType.INCOME -> this.toAccount = AccountId;
             case TransactionType.EXPENSE -> this.fromAccount = AccountId;
         }
         this.transactionType = transactionType;
-        this.transactionCategory = transactionCategory;
+        this.category = category;
         this.amount = amount;
     }
 
 
-    public Transaction(int id, Account fromAccount, Account toAccount, TransactionCategory transactionCategory, BigDecimal amount, LocalDateTime dateTime) {
+    public Transaction(int id, Account fromAccount, Account toAccount, Category category, BigDecimal amount, LocalDateTime dateTime) {
         this.id = id;
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
-        this.transactionCategory = transactionCategory;
+        this.category = category;
         this.amount = amount;
         this.dateTime = dateTime;
-    }
-
-    public Transaction(TransactionType transactionType, Account toAccount, long transactionCategoryId, BigDecimal amount) {
-        this.transactionType = transactionType;
-        this.toAccount = toAccount;
-        this.transactionCategoryId = transactionCategoryId;
-
     }
 
     public TransactionType getTransactionType() {

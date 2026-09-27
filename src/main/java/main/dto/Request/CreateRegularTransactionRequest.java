@@ -8,6 +8,6 @@ import java.math.BigDecimal;
 @Data
 public class CreateRegularTransactionRequest {
     TransactionType transactionType;
-    long transactionCategoryId;
+    Long transactionCategoryId;
     BigDecimal amount;
 }

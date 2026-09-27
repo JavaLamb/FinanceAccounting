@@ -1,4 +1,4 @@
-package main.Controllers;
+package main.controllers;
 
 import lombok.RequiredArgsConstructor;
 import main.config.CustomUserDetails;

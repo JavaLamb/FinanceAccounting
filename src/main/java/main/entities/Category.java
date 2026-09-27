@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TransactionCategory {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -26,9 +26,9 @@ public class TransactionCategory {
     )
     private User user;
 
-    public TransactionCategory(String transactionCategoryName, Integer id) {
+    public Category(String transactionCategoryName, User user) {
         this.transactionCategoryName = transactionCategoryName;
-        this.id = id;
+        this.user = user;
     }
 
     @Override

@@ -2,18 +2,13 @@ package main.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import main.entities.Account;
 import main.entities.Transaction;
-import main.entities.TransactionType;
-import main.exceptions.AccessNotAllowed;
 import main.exceptions.TransactionNotFound;
 import main.repositories.AccountRepository;
 import main.repositories.TransactionRepository;
 import main.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.login.AccountNotFoundException;
-import java.math.BigDecimal;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,29 +32,30 @@ public class TransactionService {
 //
 //    }
 
-    @Transactional
-    public Transaction createRegularTransaction(TransactionType transactionType, long transactionCategoryId, BigDecimal amount, long userId, long accountId) throws AccountNotFoundException {
-        Account account = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(AccountNotFoundException::new);
-        if(!(account.getUser().getId() == userId)) throw new AccessNotAllowed("nope");
-        if(transactionType == TransactionType.INCOME){
-            return createIncome(transactionCategoryId, amount, accountId);
-        }else{
-            throw new RuntimeException("runtime");
-            //            return createExpense(transactionCategory, amount, accountId);
-        }
-    }
+//    @Transactional
+//    public Transaction createRegularTransaction(TransactionType transactionType, long transactionCategoryId, BigDecimal amount, long userId, long accountId) throws AccountNotFoundException {
+//        Account account = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(AccountNotFoundException::new);
+//        Category.
+//        if(account.getUser().getId() != userId) throw new AccessNotAllowed("nope");
+//        if(transactionType == TransactionType.INCOME){
+//            return createIncome(transactionCategoryId, amount, accountId);
+//        }else{
+//            throw new RuntimeException("runtime");
+//            //            return createExpense(transactionCategory, amount, accountId);
+//        }
+//    }
 
-    public Transaction createIncome(long transactionCategory, BigDecimal amount, long accountId){
-        int res = accountRepository.updateBalanceById(amount,accountId);
-        Account acc = accountRepository.getReferenceById(accountId);
-        if(res == 1){
-            return transactionRepository.save(new Transaction(TransactionType.INCOME, acc, transactionCategory, amount));
-        }else{
-            throw new TransactionNotFound("not found");
-        }
-    }
+//    public Transaction createIncome(long transactionCategory, BigDecimal amount, long accountId){
+//        int res = accountRepository.updateBalanceById(amount,accountId);
+//        Account acc = accountRepository.getReferenceById(accountId);
+//        if(res == 1){
+//            return transactionRepository.save(new Transaction(TransactionType.INCOME, acc, transactionCategory, amount));
+//        }else{
+//            throw new TransactionNotFound("not found");
+//        }
+//    }
 //
-//    public Transaction createExpense(TransactionCategory transactionCategory, BigDecimal amount, long accountId){
+//    public Transaction createExpense(Category transactionCategory, BigDecimal amount, long accountId){
 //        //тут нужно проверить баланс, можем ли мы совершить такой расход с аккаунта
 //    }
 }

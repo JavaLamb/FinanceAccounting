@@ -20,8 +20,8 @@ public class AccountService {
     private final UserRepository userRepository;
     private final int accountLimit = 5;
 
-    public boolean canCreateMoreAccount(long id) {
-        return accountRepository.countAllByUserIdAndActiveTrue(id) < accountLimit;
+    public boolean canCreateMoreAccount(long userId) {
+        return accountRepository.countAllByUserIdAndActiveTrue(userId) < accountLimit;
     }
 
     @Transactional

@@ -12,7 +12,7 @@ public class TransactionToTransactionResponseConverter implements Converter<Tran
         TransactionResponse dto = new TransactionResponse()
                 .setId(source.getId())
                 .setTransactionType(source.getTransactionType())
-                .setCategoryName(source.getTransactionCategory().getTransactionCategoryName())
+                .setCategoryName(source.getCategory().getTransactionCategoryName())
                 .setAmount(source.getAmount())
                 .setDateTime(source.getDateTime());
         if (source.getFromAccount() != null) {

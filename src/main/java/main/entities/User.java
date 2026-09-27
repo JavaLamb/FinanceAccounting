@@ -23,7 +23,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Account> accounts;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<TransactionCategory> categories;
+    private List<Category> categories;
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private UserRole userRole = UserRole.USER;

@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -87,4 +88,10 @@ public class TransactionController {
         }
     }
 
+    @PatchMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponse> changeAmountOfTransaction(@PathVariable("transactionId") long transactionId, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam BigDecimal newAmount){
+        long userId = userDetails.getId();
+        transactionService.changeAmount(userId, transactionId, newAmount);
+        return ok().build();
+    }
 }

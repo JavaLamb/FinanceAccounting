@@ -81,4 +81,22 @@ public class TransactionService {
     private boolean isBalanceValid(Account account, BigDecimal amount){
         return account.getBalance().compareTo(amount) >= 0;
     }
+
+    @Transactional
+    public void changeAmount(long userId, long transactionId, BigDecimal newAmount) {
+        Transaction oldTransaction = transactionRepository.findByIdAndUserIdWithAccounts(transactionId, userId).orElseThrow(AccessNotAllowed::new);
+        BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
+        Account fromAccount = oldTransaction.getFromAccount();
+        Account toAccount = oldTransaction.getToAccount();
+        if(fromAccount != null){
+            if(fromAccount.getBalance().subtract(changeAmount).signum() < 0){
+                throw new BalanceException("nope");
+            }
+            fromAccount.setBalance(fromAccount.getBalance().subtract(changeAmount));
+        }
+        if(toAccount != null){
+            toAccount.setBalance((toAccount.getBalance().add(changeAmount)));
+        }
+        oldTransaction.setAmount(newAmount);
+    }
 }

@@ -29,6 +29,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                 AND (fa.user.id = :userId OR ta.user.id = :userId)
             """)
     Optional<Transaction> findByIdAndUserId(@Param("transactionId") long transactionId, @Param("userId") long userId);
+
     @Query("""
                 SELECT t FROM Transaction t
                 LEFT JOIN FETCH t.fromAccount fa

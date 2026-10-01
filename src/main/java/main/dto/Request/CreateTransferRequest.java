@@ -4,19 +4,17 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Data
-public class CreateTransferRequest {
-    @NotNull
-    Long toAccountId;
-    @NotNull
-    Long categoryId;
-    @NotNull
-    @Positive
-    @DecimalMax(value = "1000000.00", message = "Максимальный разовый перевод 1_000_000")
-    @Digits(integer = 9, fraction = 2, message = "Некорректный формат суммы")
-    BigDecimal amount;
+public record CreateTransferRequest(
+        @NotNull(message = "Необходимо указать id аккаунта на который произойдет перевод")
+        Long toAccountId,
+        @NotNull(message = "Необходимо указать id категории")
+        Long categoryId,
+        @NotNull(message = "Необходимо размер транзакции")
+        @Positive
+        @DecimalMax(value = "1000000.00", message = "Максимальный разовый перевод 1_000_000")
+        @Digits(integer = 9, fraction = 2, message = "Некорректный формат суммы")
+        BigDecimal amount) {
 }

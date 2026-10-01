@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "transaction")
@@ -31,7 +31,7 @@ public class Transaction {
     private BigDecimal amount;
     @Column(name = "date_time")
     @CreationTimestamp
-    private LocalDateTime dateTime;
+    private Instant dateTime;
     @Transient
     private TransactionType transactionType;
 
@@ -51,16 +51,6 @@ public class Transaction {
         this.transactionType = transactionType;
         this.category = category;
         this.amount = amount;
-    }
-
-
-    public Transaction(int id, Account fromAccount, Account toAccount, Category category, BigDecimal amount, LocalDateTime dateTime) {
-        this.id = id;
-        this.fromAccount = fromAccount;
-        this.toAccount = toAccount;
-        this.category = category;
-        this.amount = amount;
-        this.dateTime = dateTime;
     }
 
     public TransactionType getTransactionType() {

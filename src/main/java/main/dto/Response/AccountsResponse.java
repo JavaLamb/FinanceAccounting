@@ -1,16 +1,16 @@
 package main.dto.Response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 import main.entities.AccountType;
 
 import java.math.BigDecimal;
 
-@Getter
-@AllArgsConstructor
-public class AccountsResponse {
-    Long id;
-    String name;
-    BigDecimal balance;
-    AccountType accountType;
+@Builder
+@Jacksonized
+public record AccountsResponse(
+        Long id,
+        String name,
+        BigDecimal balance,
+        AccountType accountType) {
 }

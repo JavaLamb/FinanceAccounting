@@ -1,15 +1,11 @@
 package main.dto.Response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 
-@Accessors(chain = true)
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserResponse {
-    Long id;
-    String email;
+@Builder
+@Jacksonized
+public record UserResponse(
+        Long id,
+        String email) {
 }

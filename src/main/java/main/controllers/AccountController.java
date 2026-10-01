@@ -43,7 +43,7 @@ public class AccountController {
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             long userId = userDetails.getId();
-            Account newAccount = accountService.createAccount(dto.getName(), userId, dto.getAccountType());
+            Account newAccount = accountService.createAccount(dto.name(), userId, dto.accountType());
             URI url = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")

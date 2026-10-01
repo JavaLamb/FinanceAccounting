@@ -9,18 +9,14 @@ import org.springframework.stereotype.Component;
 public class TransactionToTransactionResponseConverter implements Converter<Transaction, TransactionResponse> {
     @Override
     public TransactionResponse convert(Transaction source) {
-        TransactionResponse dto = new TransactionResponse()
-                .setId(source.getId())
-                .setTransactionType(source.getTransactionType())
-                .setCategoryName(source.getCategory().getTransactionCategoryName())
-                .setAmount(source.getAmount())
-                .setDateTime(source.getDateTime());
-        if (source.getFromAccount() != null) {
-            dto.setFromAccountId(source.getFromAccount().getId());
-        }
-        if (source.getToAccount() != null) {
-            dto.setToAccountId(source.getToAccount().getId());
-        }
-        return dto;
+        return TransactionResponse.builder()
+                .id(source.getId())
+                .transactionType(source.getTransactionType())
+                .categoryName(source.getCategory().getTransactionCategoryName())
+                .amount(source.getAmount())
+                .dateTime(source.getDateTime())
+                .fromAccountId(source.getFromAccount() != null ? source.getFromAccount().getId() : null)
+                .toAccountId(source.getToAccount() != null ? source.getToAccount().getId() : null)
+                .build();
     }
 }

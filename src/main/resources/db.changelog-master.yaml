@@ -207,3 +207,15 @@ databaseChangeLog:
                   name: active
                   valueBoolean: true
             where: active IS NULL
+  - changeSet:
+      id: 8-alter-transaction-date-to-tz
+      author: me
+      changes:
+        - modifyDataType:
+            tableName: transaction
+            columnName: date_time
+            newDataType: TIMESTAMP WITH TIME ZONE
+        - addDefaultValue:
+            tableName: transaction
+            columnName: date_time
+            defaultValueComputed: current_timestamp

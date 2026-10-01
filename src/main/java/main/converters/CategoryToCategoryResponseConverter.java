@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 public class CategoryToCategoryResponseConverter implements Converter<Category, CategoryResponse> {
     @Override
     public CategoryResponse convert(Category source) {
-        return new CategoryResponse(source.getTransactionCategoryName(), source.getId());
+        return CategoryResponse.builder()
+                .id(source.getId())
+                .categoryName(source.getTransactionCategoryName())
+                .build();
     }
 }

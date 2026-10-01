@@ -37,11 +37,11 @@ public class UserService {
 
     @Transactional
     public User registration(RegiRequest request) {
-        userRepository.findByEmail(request.getUsername())
+        userRepository.findByEmail(request.username())
                 .ifPresent(_ -> {
                     throw new RegistrationException("Пользователь с данным email уже существует");
                 });
-        return userRepository.save(new User(request.getUsername(), encoder.encode(request.getPassword())));
+        return userRepository.save(new User(request.username(), encoder.encode(request.password())));
     }
 
 

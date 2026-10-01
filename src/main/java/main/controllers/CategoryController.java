@@ -43,7 +43,7 @@ public class CategoryController {
                                                            @Validated @RequestBody CategoryRequest dto){
         try {
             long userId = userDetails.getId();
-            Category newCategory = categoryService.createCategory(dto.getCategoryName(), userId);
+            Category newCategory = categoryService.createCategory(dto.categoryName(), userId);
             URI url = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")

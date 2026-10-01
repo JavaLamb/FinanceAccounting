@@ -54,7 +54,7 @@ public class TransactionController {
                                                                         @Validated @RequestBody CreateRegularTransactionRequest dto) {
         try {
             long userId = userDetails.getId();
-            Transaction newTransaction = transactionService.createRegularTransaction(dto.getTransactionType(), dto.getCategoryId(), dto.getAmount(), userId, accountId);
+            Transaction newTransaction = transactionService.createRegularTransaction(dto.transactionType(), dto.categoryId(), dto.amount(), userId, accountId);
             return ok(converter.convert(newTransaction));
         } catch (AccountNotFoundException e) {
             return status(HttpStatus.NOT_FOUND).build();
@@ -87,7 +87,7 @@ public class TransactionController {
                                                               @Validated @RequestBody CreateTransferRequest dto) {
         try {
             long userId = userDetails.getId();
-            Transaction newTransaction = transactionService.createTransfer(dto.getToAccountId(), dto.getAmount(), dto.getCategoryId(), fromAccountId, userId);
+            Transaction newTransaction = transactionService.createTransfer(dto.toAccountId(), dto.amount(), dto.categoryId(), fromAccountId, userId);
             return ok(converter.convert(newTransaction));
         } catch (AccountNotFoundException e) {
             return status(HttpStatus.BAD_REQUEST).build();

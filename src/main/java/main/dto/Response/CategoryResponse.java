@@ -1,11 +1,11 @@
 package main.dto.Response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
 
-@AllArgsConstructor
-@Data
-public class CategoryResponse {
-    private String categoryName;
-    private long id;
+@Builder
+@Jacksonized
+public record CategoryResponse(
+        String categoryName,
+        long id) {
 }

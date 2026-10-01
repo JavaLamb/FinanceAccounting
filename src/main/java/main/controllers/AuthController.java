@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +33,7 @@ public class AuthController {
     private final SecurityContextRepository securityContextRepository;
 
     @PostMapping("/registration")
-    public ResponseEntity<UserResponse> registration(@RequestBody RegiRequest request) {
+    public ResponseEntity<UserResponse> registration(@Validated @RequestBody RegiRequest request) {
         try {
             return ok(converter.convert(userService.registration(request)));
         } catch (RegistrationException e) {
@@ -41,7 +42,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> authorization(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> authorization(@Validated @RequestBody LoginRequest loginRequest,
+                                              HttpServletRequest request,
+                                              HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);

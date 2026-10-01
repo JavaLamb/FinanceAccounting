@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,7 +39,8 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryResponse> createCategory(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody CategoryRequest dto){
+    public ResponseEntity<CategoryResponse> createCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                           @Validated @RequestBody CategoryRequest dto){
         try {
             long userId = userDetails.getId();
             Category newCategory = categoryService.createCategory(dto.getCategoryName(), userId);

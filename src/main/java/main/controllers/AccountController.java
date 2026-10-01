@@ -11,6 +11,7 @@ import main.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -38,7 +39,8 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountsResponse> createAccount(@RequestBody CreateAccountRequest dto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<AccountsResponse> createAccount(@Validated @RequestBody CreateAccountRequest dto,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             long userId = userDetails.getId();
             Account newAccount = accountService.createAccount(dto.getName(), userId, dto.getAccountType());
@@ -53,7 +55,8 @@ public class AccountController {
         }
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccountById(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<Void> deleteAccountById(@PathVariable("id") long accountId,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
         try {
             accountService.deactivateAccount(accountId, userDetails.getId());
             return ok().build();
@@ -63,7 +66,8 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountsResponse> getAccountById(@PathVariable("id") long accountId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<AccountsResponse> getAccountById(@PathVariable("id") long accountId,
+                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             Account account = accountService.findByIdService(accountId, userDetails.getId());
             return ok(converter.convert(account));

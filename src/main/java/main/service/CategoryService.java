@@ -1,10 +1,11 @@
 package main.service;
 
-import jakarta.transaction.Transactional;
+import main.exceptions.BusinessLogicException;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import main.entities.Category;
 import main.entities.User;
-import main.exceptions.CategoryException;
 import main.repositories.CategoryRepository;
 import main.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,17 @@ public class CategoryService {
     private final int limit = 5;
 
     @Transactional
-    public List<Category> getCategoriesByUserId(long userId){
+    public List<Category> getCategoriesByUserId(long userId) {
         return categoryRepository.findAllByUserId(userId);
     }
 
     @Transactional
-    public Category createCategory(String categoryName, long userId){
-        if(!canCreateMoreCategory(userId)){
-            throw new CategoryException("Category limit exceeded");
+    public Category createCategory(String categoryName, long userId) {
+        if (!canCreateMoreCategory(userId)) {
+            throw new BusinessLogicException(
+                    "Category limit exceeded",
+                    HttpStatus.BAD_REQUEST,
+                    "CATEGORY_LIMIT_EXCEEDED");
         }
         User user = userRepository.getReferenceById(userId);
         return categoryRepository.save(new Category(categoryName, user));

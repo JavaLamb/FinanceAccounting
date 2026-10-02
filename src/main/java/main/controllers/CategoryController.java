@@ -6,9 +6,7 @@ import main.converters.CategoryToCategoryResponseConverter;
 import main.dto.Request.CategoryRequest;
 import main.dto.Response.CategoryResponse;
 import main.entities.Category;
-import main.exceptions.CategoryException;
 import main.service.CategoryService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -41,7 +39,6 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @Validated @RequestBody CategoryRequest dto){
-        try {
             long userId = userDetails.getId();
             Category newCategory = categoryService.createCategory(dto.categoryName(), userId);
             URI url = ServletUriComponentsBuilder
@@ -50,8 +47,5 @@ public class CategoryController {
                     .buildAndExpand(newCategory.getId())
                     .toUri();
             return created(url).body(converter.convert(newCategory));
-        } catch (CategoryException e) {
-            return status(HttpStatus.BAD_REQUEST).build();
-        }
     }
 }

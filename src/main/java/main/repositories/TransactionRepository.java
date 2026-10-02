@@ -30,6 +30,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             """)
     Optional<Transaction> findByIdAndUserId(@Param("transactionId") long transactionId, @Param("userId") long userId);
 
+    Optional<Transaction> findById(long transactionId);
+
     @Query("""
                 SELECT t FROM Transaction t
                 LEFT JOIN FETCH t.fromAccount fa
@@ -38,4 +40,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                 AND fa.user.id = :userId
             """)
     Optional<Transaction> findByIdAndUserIdWithAccounts(@Param("transactionId") long transactionId, @Param("userId") long userId);
+
+    @Query("""
+                SELECT t FROM Transaction t
+                LEFT JOIN FETCH t.fromAccount fa
+                LEFT JOIN FETCH t.toAccount ta
+                WHERE t.id = :transactionId
+            """)
+    Optional<Transaction> findByIdWithAccounts(@Param("transactionId") long transactionId);
+
 }

@@ -15,7 +15,11 @@ import java.util.Optional;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByUserIdAndActiveTrue(long userId);
+
+    Optional<Account> findByIdAndUserIdAndActiveTrue(long accountId, long userId);
+
     int countAllByUserIdAndActiveTrue(long userid);
+
     @Modifying
     @Query("""
                 UPDATE Account a
@@ -24,7 +28,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
                     AND a.user.id = :userId
                     AND a.active = true
             """)
-    int deactivateByIdAndUserId(@Param("accountId") long accountId,@Param("userId") long userId);
+    int deactivateByIdAndUserId(@Param("accountId") long accountId, @Param("userId") long userId);
+
     Optional<Account> findByIdAndActiveTrue(long accountId);
 
     @Transactional
@@ -32,4 +37,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("update Account a set a.balance = :balance where a.id = :id")
     int updateBalanceById(@Param("balance") BigDecimal balance, @Param("id") Long id);
 
+    boolean existsByIdAndUserId(long accountId, long userId);
 }

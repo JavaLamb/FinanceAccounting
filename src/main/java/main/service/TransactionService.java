@@ -1,76 +1,105 @@
 package main.service;
 
-import jakarta.transaction.Transactional;
+import main.exceptions.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import main.entities.Account;
 import main.entities.Category;
 import main.entities.Transaction;
 import main.entities.TransactionType;
-import main.exceptions.AccessNotAllowed;
-import main.exceptions.BalanceException;
-import main.exceptions.TransactionNotFound;
 import main.repositories.AccountRepository;
 import main.repositories.CategoryRepository;
 import main.repositories.TransactionRepository;
-import main.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final CategoryRepository categoryRepository;
 
-    @Transactional
-    public List<Transaction> findAllByAccId(long accountId, long userId){
-        List<Transaction> list = transactionRepository.findAllByAccountIdAndUserIdWithCategory(accountId, userId);
-        if(list.isEmpty()){
-            throw new TransactionNotFound("not found");
+    @Transactional(readOnly = true)
+    public List<Transaction> findAllByAccId(long accountId, long userId) {
+        if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
+            throw new ResourceNotFoundException("Account", String.valueOf(accountId)); //
         }
-        return list;
+        return transactionRepository.findAllByAccountIdAndUserIdWithCategory(accountId, userId);
     }
 
-    @Transactional
-    public Transaction getTransactionById(long userId, long transactionId){
-        return transactionRepository.findByIdAndUserId(transactionId, userId).orElseThrow(AccessNotAllowed::new);
+    @Transactional(readOnly = true)
+    public Transaction getTransactionById(long userId, long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Transaction",
+                        String.valueOf(transactionId)
+                ));
+        boolean isOwner = false;
+        if (transaction.getFromAccount() != null && transaction.getFromAccount().getUser().getId() == userId) {
+            isOwner = true;
+        }
+        if (transaction.getToAccount() != null && transaction.getToAccount().getUser().getId() == userId) {
+            isOwner = true;
+        }
+        if (!isOwner) {
+            throw new BusinessLogicException(
+                    "Transaction info is available to the participant only",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            );
+        }
+        return transaction;
     }
 
+
     @Transactional
-    public Transaction createRegularTransaction(TransactionType transactionType, long categoryId, BigDecimal amount, long userId, long accountId) throws AccountNotFoundException {
-        Account account = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(AccountNotFoundException::new);
-        Category category = categoryRepository.findByIdAndUserId(categoryId, userId).orElseThrow(AccessNotAllowed::new);
-        if(category.getUser().getId() != userId) throw new AccessNotAllowed("nope");
-        if(account.getUser().getId() != userId) throw new AccessNotAllowed("nope");
-        if(transactionType == TransactionType.INCOME){
+    public Transaction createRegularTransaction(TransactionType transactionType, long categoryId, BigDecimal amount, long userId, long accountId) {
+        Account account = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(() -> new ResourceNotFoundException("Account", String.valueOf(accountId)));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", String.valueOf(categoryId)));
+        if (category.getUser().getId() != userId) throw new BusinessLogicException(
+                "To create a transaction, you must be the category owner",
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED"
+        );
+        if (account.getUser().getId() != userId) throw new BusinessLogicException(
+                "To create a transaction, you must be the account owner",
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED"
+        );
+        if (transactionType == TransactionType.INCOME) {
             return createIncome(category, amount, account);
-        }else{
+        } else {
             return createExpense(category, amount, account);
         }
     }
 
-    public Transaction createIncome(Category category, BigDecimal amount, Account account){
+    public Transaction createIncome(Category category, BigDecimal amount, Account account) {
         account.setBalance(account.getBalance().add(amount));
         return transactionRepository.save(new Transaction(TransactionType.INCOME, account, category, amount));
     }
 
-    public Transaction createExpense(Category category, BigDecimal amount, Account account){
-        if(!isBalanceValid(account, amount)) throw new BalanceException("balance too low");
+    public Transaction createExpense(Category category, BigDecimal amount, Account account) {
+        if (!isBalanceValid(account, amount))
+            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
         account.setBalance(account.getBalance().subtract(amount));
         return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
     }
+
     @Transactional
     public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) throws AccountNotFoundException {
-        Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId).orElseThrow(AccountNotFoundException::new);
-        Category category = categoryRepository.findByIdAndUserId(categoryId, userId).orElseThrow(AccessNotAllowed::new);
-        if(fromAccount.getUser().getId() != userId) throw new AccessNotAllowed("nope");
-        if(!isBalanceValid(fromAccount, amount)) throw new BalanceException("balance too low");
+        Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId).orElseThrow(() -> new ResourceNotFoundException("Account", String.valueOf(fromAccountId)));
+        Category category = categoryRepository.findByIdAndUserId(categoryId, userId).orElseThrow(() -> new ResourceNotFoundException("Category", String.valueOf(categoryId)));
+        if (fromAccount.getUser().getId() != userId) throw new BusinessLogicException(
+                "The originating account must belong to the transfer originator",
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED");
+        if (!isBalanceValid(fromAccount, amount))
+            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
         Account toAccount = accountRepository.findByIdAndActiveTrue(toAccountId).orElseThrow(AccountNotFoundException::new);
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
@@ -79,23 +108,42 @@ public class TransactionService {
         return transactionRepository.save(new Transaction(TransactionType.TRANSFER, fromAccount, toAccount, category, amount));
     }
 
-    private boolean isBalanceValid(Account account, BigDecimal amount){
+    private boolean isBalanceValid(Account account, BigDecimal amount) {
         return account.getBalance().compareTo(amount) >= 0;
     }
 
+
     @Transactional
     public void changeAmount(long userId, long transactionId, BigDecimal newAmount) {
-        Transaction oldTransaction = transactionRepository.findByIdAndUserIdWithAccounts(transactionId, userId).orElseThrow(AccessNotAllowed::new);
+        Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId).orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
-        if(fromAccount != null){
-            if(fromAccount.getBalance().subtract(changeAmount).signum() < 0){
-                throw new BalanceException("nope");
+        boolean isFromOwner = fromAccount == null || fromAccount.getUser().getId() == userId;
+        boolean isToOwner = toAccount == null || toAccount.getUser().getId() == userId;
+        if (!isFromOwner || !isToOwner) {
+            throw new BusinessLogicException(
+                    "To change amount of transaction you must be the owner of both accounts",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            );
+        }
+        if (fromAccount != null) {
+            if (fromAccount.getBalance().subtract(changeAmount).signum() < 0) {
+                throw new BusinessLogicException(
+                        "Impossible to change transaction amount: balance of account " + fromAccount.getName() + " will become negative",
+                        HttpStatus.BAD_REQUEST,
+                        "INSUFFICIENT_FUNDS");
             }
             fromAccount.setBalance(fromAccount.getBalance().subtract(changeAmount));
         }
-        if(toAccount != null){
+        if (toAccount != null) {
+            if (toAccount.getBalance().add(changeAmount).signum() < 0) {
+                throw new BusinessLogicException(
+                        "Impossible to change transaction amount: balance of account " + fromAccount.getName() + " will become negative",
+                        HttpStatus.BAD_REQUEST,
+                        "INSUFFICIENT_FUNDS");
+            }
             toAccount.setBalance((toAccount.getBalance().add(changeAmount)));
         }
         oldTransaction.setAmount(newAmount);
@@ -103,22 +151,38 @@ public class TransactionService {
 
     @Transactional
     public void deleteTransaction(long transactionId, long userId) {
-        Transaction oldTransaction = transactionRepository.findByIdAndUserIdWithAccounts(transactionId, userId).orElseThrow(AccessNotAllowed::new);
+        Transaction oldTransaction = transactionRepository.findByIdAndUserIdWithAccounts(transactionId, userId).orElseThrow(() -> new BusinessLogicException(
+                "For deleting transfer both accounts should belong to the same user",
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED"
+        ));
         BigDecimal amount = oldTransaction.getAmount();
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
         if (fromAccount == null) {
-            if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BalanceException("nope");
+            if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BusinessLogicException(
+                    "Impossible to delete transaction: balance of account " + toAccount.getName() + " will become negative",
+                    HttpStatus.BAD_REQUEST,
+                    "INSUFFICIENT_FUNDS"
+            );
             toAccount.setBalance(toAccount.getBalance().subtract(amount));
         } else if (toAccount == null) {
             fromAccount.setBalance(fromAccount.getBalance().add(amount));
         } else {
             if (Objects.equals(fromAccount.getUser().getId(), toAccount.getUser().getId())) {
-                if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BalanceException("nope");
+                if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BusinessLogicException(
+                        "Impossible to delete transaction: balance of destination account " + toAccount.getName() + " will become negative",
+                        HttpStatus.BAD_REQUEST,
+                        "INSUFFICIENT_FUNDS"
+                );
                 fromAccount.setBalance(fromAccount.getBalance().add(amount));
                 toAccount.setBalance(toAccount.getBalance().subtract(amount));
             } else {
-                throw new AccessNotAllowed("access not allowed");
+                throw new BusinessLogicException(
+                        "For deleting transfer both accounts should belong to the same user",
+                        HttpStatus.FORBIDDEN,
+                        "ACCESS_DENIED"
+                );
             }
         }
         transactionRepository.delete(oldTransaction);

@@ -1,15 +1,15 @@
 package main.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import main.entities.User;
-import main.exceptions.RegistrationException;
+import main.exceptions.ValidationException;
 import main.repositories.UserRepository;
 import main.dto.Request.RegiRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -37,11 +37,11 @@ public class UserService {
 
     @Transactional
     public User registration(RegiRequest request) {
-        userRepository.findByEmail(request.username())
-                .ifPresent(_ -> {
-                    throw new RegistrationException("Пользователь с данным email уже существует");
-                });
-        return userRepository.save(new User(request.username(), encoder.encode(request.password())));
+        if (userRepository.existsByEmail(request.username())) {
+            throw new ValidationException(Map.of("username", List.of("Email is already taken")));
+        }
+        User newUser = new User(request.username(), encoder.encode(request.password()));
+        return userRepository.save(newUser);
     }
 
 

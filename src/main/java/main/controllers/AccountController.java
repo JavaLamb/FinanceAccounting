@@ -6,16 +6,13 @@ import main.converters.AccountToAccountResponseConverter;
 import main.dto.Request.CreateAccountRequest;
 import main.dto.Response.AccountsResponse;
 import main.entities.Account;
-import main.exceptions.AccountException;
 import main.service.AccountService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.net.URI;
 import java.util.List;
 
@@ -41,40 +38,27 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<AccountsResponse> createAccount(@Validated @RequestBody CreateAccountRequest dto,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            long userId = userDetails.getId();
-            Account newAccount = accountService.createAccount(dto.name(), userId, dto.accountType());
-            URI url = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(newAccount.getId())
-                    .toUri();
-            return created(url).body(converter.convert(newAccount));
-        } catch (AccountException e) {
-            return status(HttpStatus.BAD_REQUEST).build();
-        }
+        long userId = userDetails.getId();
+        Account newAccount = accountService.createAccount(dto.name(), userId, dto.accountType());
+        URI url = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(newAccount.getId())
+                .toUri();
+        return created(url).body(converter.convert(newAccount));
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAccountById(@PathVariable("id") long accountId,
-                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
-        try {
-            accountService.deactivateAccount(accountId, userDetails.getId());
-            return ok().build();
-        } catch (AccountException e) {
-            return status(HttpStatus.BAD_REQUEST).build();
-        }
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        accountService.deactivateAccount(accountId, userDetails.getId());
+        return ok().build();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AccountsResponse> getAccountById(@PathVariable("id") long accountId,
                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            Account account = accountService.findByIdService(accountId, userDetails.getId());
-            return ok(converter.convert(account));
-        } catch (AccountNotFoundException e) {
-            return status(HttpStatus.NOT_FOUND).build();
-        } catch (AccountException e) {
-            return status(HttpStatus.FORBIDDEN).build();
-        }
+        Account account = accountService.findByIdService(accountId, userDetails.getId());
+        return ok(converter.convert(account));
     }
 }

@@ -4,12 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import main.converters.UserToUserResponseConverter;
-import main.exceptions.RegistrationException;
 import main.service.UserService;
 import main.dto.Request.LoginRequest;
 import main.dto.Request.RegiRequest;
 import main.dto.Response.UserResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,11 +32,7 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<UserResponse> registration(@Validated @RequestBody RegiRequest request) {
-        try {
             return ok(converter.convert(userService.registration(request)));
-        } catch (RegistrationException e) {
-            return status(HttpStatus.CONFLICT).build();
-        }
     }
 
     @PostMapping("/login")

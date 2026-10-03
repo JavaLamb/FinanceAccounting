@@ -98,7 +98,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public void changeAmount(long userId, long transactionId, BigDecimal newAmount) {
+    public Transaction changeAmount(long userId, long transactionId, BigDecimal newAmount) {
         Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
@@ -132,6 +132,7 @@ public class TransactionService {
             toAccount.setBalance((toAccount.getBalance().add(changeAmount)));
         }
         oldTransaction.setAmount(newAmount);
+        return oldTransaction;
     }
 
     @Transactional

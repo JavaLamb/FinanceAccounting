@@ -76,12 +76,10 @@ public class TransactionController {
     @PatchMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> changeAmountOfTransaction(@PathVariable("transactionId") long transactionId,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                         @DecimalMax(value = "1000000.00", message = "Максимальный разовый перевод 1_000_000")
-                                                                         @Digits(integer = 9, fraction = 2, message = "Некорректный формат суммы")
-                                                                         @Positive @RequestParam BigDecimal newAmount) {
+                                                                         @Validated @RequestBody BigDecimal newAmount) {
         long userId = userDetails.getId();
-        transactionService.changeAmount(userId, transactionId, newAmount);
-        return ok().build();
+        Transaction newTransaction = transactionService.changeAmount(userId, transactionId, newAmount);
+        return ok().body(converter.convert(newTransaction));
     }
 
     @DeleteMapping("/{transactionId}")

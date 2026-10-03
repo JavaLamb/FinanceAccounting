@@ -7,5 +7,6 @@ public record LoginRequest(
         String username,
 
         @NotBlank(message = "Password cannot be empty")
-        String password) {
+        String password
+) {
 }

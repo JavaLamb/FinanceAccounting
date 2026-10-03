@@ -16,5 +16,6 @@ public record CreateTransferRequest(
         @Positive
         @DecimalMax(value = "1000000.00", message = "Maximum amount of single transfer is 1_000_000")
         @Digits(integer = 9, fraction = 2, message = "Incorrect format of amount")
-        BigDecimal amount) {
+        BigDecimal amount
+) {
 }

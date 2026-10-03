@@ -12,5 +12,6 @@ public record CreateAccountRequest(
         String name,
 
         @NotNull(message = "Account type cannot be empty")
-        AccountType accountType) {
+        AccountType accountType
+) {
 }

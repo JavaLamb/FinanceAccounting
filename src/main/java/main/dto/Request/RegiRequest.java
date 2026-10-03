@@ -16,5 +16,6 @@ public record RegiRequest(
                 regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$",
                 message = "The password must contain at least one digit, one uppercase letter, one lowercase letter, and one special character."
         )
-        String password) {
+        String password
+) {
 }

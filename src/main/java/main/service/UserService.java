@@ -17,24 +17,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
 
-    public Optional<User> findByEmailService(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public boolean checkPassword(String password, User user) {
-        String hash = user.getHashPassword();
-        return encoder.matches(password, hash);
-    }
-
-    public User createUser(String email, String password) {
-        User newUser = new User(email, password);
-        return userRepository.save(newUser);
-    }
-
-    public boolean checkEmail(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
     @Transactional
     public User registration(RegiRequest request) {
         if (userRepository.existsByEmail(request.username())) {
@@ -42,10 +24,5 @@ public class UserService {
         }
         User newUser = new User(request.username(), encoder.encode(request.password()));
         return userRepository.save(newUser);
-    }
-
-
-    public boolean isExistByEmail(String email) {
-        return userRepository.findByEmail(email).isPresent();
     }
 }

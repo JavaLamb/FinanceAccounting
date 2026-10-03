@@ -20,15 +20,12 @@ public class AccountService {
     private final UserRepository userRepository;
     private final int accountLimit = 5;
 
-    private boolean canCreateMoreAccount(long userId) {
-        return accountRepository.countAllByUserIdAndActiveTrue(userId) < accountLimit;
-    }
-
     @Transactional
     public void deactivateAccount(long accountId, long userId) {
         accountRepository.deactivateByIdAndUserId(accountId, userId);
     }
 
+    @Transactional(readOnly = true)
     public Account findByIdService(long accountId, long userId) {
         return accountRepository.findByIdAndUserIdAndActiveTrue(accountId, userId)
                 .orElseThrow(() -> new BusinessLogicException(
@@ -49,8 +46,12 @@ public class AccountService {
         return accountRepository.save(new Account(name, user, accType));
     }
 
+    @Transactional(readOnly = true)
     public List<Account> getAllByUserId(long userId) {
         return accountRepository.findByUserIdAndActiveTrue(userId);
     }
 
+    private boolean canCreateMoreAccount(long userId) {
+        return accountRepository.countAllByUserIdAndActiveTrue(userId) < accountLimit;
+    }
 }

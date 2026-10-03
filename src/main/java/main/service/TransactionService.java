@@ -1,5 +1,6 @@
 package main.service;
 
+import jakarta.validation.constraints.NotNull;
 import main.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +13,13 @@ import main.repositories.AccountRepository;
 import main.repositories.CategoryRepository;
 import main.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Validated
 @RequiredArgsConstructor
 @Service
 public class TransactionService {
@@ -98,7 +101,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction changeAmount(long userId, long transactionId, BigDecimal newAmount) {
+    public Transaction changeAmount(long userId, long transactionId, @NotNull BigDecimal newAmount) {
         Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
@@ -179,7 +182,7 @@ public class TransactionService {
         transactionRepository.delete(oldTransaction);
     }
 
-    private boolean isOwner(Account account, long userId) {
+    private boolean isOwner(@NotNull Account account, long userId) {
         return account.getUser().getId() == userId;
     }
 

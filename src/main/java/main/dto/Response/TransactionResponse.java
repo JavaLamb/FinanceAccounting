@@ -3,7 +3,6 @@ package main.dto.Response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import lombok.extern.jackson.Jacksonized;
 import main.entities.TransactionType;
 
 import java.math.BigDecimal;

@@ -19,7 +19,7 @@ public class CategoryService {
     private final UserRepository userRepository;
     private final int limit = 5;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Category> getCategoriesByUserId(long userId) {
         return categoryRepository.findAllByUserId(userId);
     }

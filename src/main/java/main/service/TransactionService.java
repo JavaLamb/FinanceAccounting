@@ -39,14 +39,14 @@ public class TransactionService {
                         "Transaction",
                         String.valueOf(transactionId)
                 ));
-        boolean isOwner = false;
-        if (transaction.getFromAccount() != null && transaction.getFromAccount().getUser().getId() == userId) {
-            isOwner = true;
+        boolean Ok = false;
+        if (transaction.getFromAccount() != null && isOwner(transaction.getFromAccount(), userId)) {
+            Ok = true;
         }
-        if (transaction.getToAccount() != null && transaction.getToAccount().getUser().getId() == userId) {
-            isOwner = true;
+        if (transaction.getToAccount() != null && isOwner(transaction.getToAccount(), userId)) {
+            Ok = true;
         }
-        if (!isOwner) {
+        if (!Ok) {
             throw new BusinessLogicException(
                     "Transaction info is available to the participant only",
                     HttpStatus.FORBIDDEN,
@@ -78,17 +78,6 @@ public class TransactionService {
         }
     }
 
-    public Transaction createIncome(Category category, BigDecimal amount, Account account) {
-        account.setBalance(account.getBalance().add(amount));
-        return transactionRepository.save(new Transaction(TransactionType.INCOME, account, category, amount));
-    }
-
-    public Transaction createExpense(Category category, BigDecimal amount, Account account) {
-        if (!isBalanceValid(account, amount))
-            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
-        account.setBalance(account.getBalance().subtract(amount));
-        return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
-    }
 
     @Transactional
     public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) throws AccountNotFoundException {
@@ -108,19 +97,15 @@ public class TransactionService {
         return transactionRepository.save(new Transaction(TransactionType.TRANSFER, fromAccount, toAccount, category, amount));
     }
 
-    private boolean isBalanceValid(Account account, BigDecimal amount) {
-        return account.getBalance().compareTo(amount) >= 0;
-    }
-
-
     @Transactional
     public void changeAmount(long userId, long transactionId, BigDecimal newAmount) {
-        Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId).orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
+        Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
-        boolean isFromOwner = fromAccount == null || fromAccount.getUser().getId() == userId;
-        boolean isToOwner = toAccount == null || toAccount.getUser().getId() == userId;
+        boolean isFromOwner = fromAccount == null || isOwner(fromAccount, userId);
+        boolean isToOwner = toAccount == null || isOwner(toAccount, userId);
         if (!isFromOwner || !isToOwner) {
             throw new BusinessLogicException(
                     "To change amount of transaction you must be the owner of both accounts",
@@ -151,40 +136,65 @@ public class TransactionService {
 
     @Transactional
     public void deleteTransaction(long transactionId, long userId) {
-        Transaction oldTransaction = transactionRepository.findByIdAndUserIdWithAccounts(transactionId, userId).orElseThrow(() -> new BusinessLogicException(
-                "For deleting transfer both accounts should belong to the same user",
-                HttpStatus.FORBIDDEN,
-                "ACCESS_DENIED"
-        ));
+        Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
         BigDecimal amount = oldTransaction.getAmount();
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
-        if (fromAccount == null) {
-            if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BusinessLogicException(
-                    "Impossible to delete transaction: balance of account " + toAccount.getName() + " will become negative",
-                    HttpStatus.BAD_REQUEST,
-                    "INSUFFICIENT_FUNDS"
+
+        boolean isFromOwner = fromAccount == null || isOwner(fromAccount, userId);
+        boolean isToOwner = toAccount == null || isOwner(toAccount, userId);
+        if (!isFromOwner || !isToOwner) {
+            throw new BusinessLogicException(
+                    "To delete transaction you must be the owner of both accounts",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
             );
+        }
+        if (fromAccount == null) {
+            if (toAccount.getBalance().subtract(amount).signum() < 0) {
+                throw new BusinessLogicException(
+                        "Impossible to delete transaction: balance of account "
+                                + toAccount.getName() + " will become negative",
+                        HttpStatus.BAD_REQUEST,
+                        "INSUFFICIENT_FUNDS"
+                );
+            }
             toAccount.setBalance(toAccount.getBalance().subtract(amount));
         } else if (toAccount == null) {
             fromAccount.setBalance(fromAccount.getBalance().add(amount));
         } else {
-            if (Objects.equals(fromAccount.getUser().getId(), toAccount.getUser().getId())) {
-                if (toAccount.getBalance().subtract(amount).signum() < 0) throw new BusinessLogicException(
-                        "Impossible to delete transaction: balance of destination account " + toAccount.getName() + " will become negative",
+            if (toAccount.getBalance().subtract(amount).signum() < 0) {
+                throw new BusinessLogicException(
+                        "Impossible to delete transaction: balance of destination account "
+                                + toAccount.getName() + " will become negative",
                         HttpStatus.BAD_REQUEST,
                         "INSUFFICIENT_FUNDS"
                 );
-                fromAccount.setBalance(fromAccount.getBalance().add(amount));
-                toAccount.setBalance(toAccount.getBalance().subtract(amount));
-            } else {
-                throw new BusinessLogicException(
-                        "For deleting transfer both accounts should belong to the same user",
-                        HttpStatus.FORBIDDEN,
-                        "ACCESS_DENIED"
-                );
             }
+            fromAccount.setBalance(fromAccount.getBalance().add(amount));
+            toAccount.setBalance(toAccount.getBalance().subtract(amount));
         }
         transactionRepository.delete(oldTransaction);
+    }
+
+    private boolean isOwner(Account account, long userId) {
+        return account.getUser().getId() == userId;
+    }
+
+    private Transaction createIncome(Category category, BigDecimal amount, Account account) {
+        account.setBalance(account.getBalance().add(amount));
+        return transactionRepository.save(new Transaction(TransactionType.INCOME, account, category, amount));
+    }
+
+    private Transaction createExpense(Category category, BigDecimal amount, Account account) {
+        if (!isBalanceValid(account, amount))
+            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
+        account.setBalance(account.getBalance().subtract(amount));
+        return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
+    }
+
+    private boolean isBalanceValid(Account account, BigDecimal amount) {
+        return account.getBalance().compareTo(amount) >= 0;
     }
 }

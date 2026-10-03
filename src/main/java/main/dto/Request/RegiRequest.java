@@ -6,15 +6,15 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegiRequest(
-        @NotBlank(message = "Email не может быть пустым")
-        @Email(message = "Введите корректный email")
+        @NotBlank(message = "Email cannot be empty")
+        @Email(message = "Incorrect format of email")
         String username,
 
-        @NotBlank(message = "Пароль не может быть пустым")
-        @Size(min = 8, max = 32, message = "Длина пароля должна быть от {min} до {max} символов")
+        @NotBlank(message = "Password cannot be empty")
+        @Size(min = 8, max = 32, message = "Length must be from {min} to {max} symbols")
         @Pattern(
                 regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$",
-                message = "Пароль должен содержать минимум одну цифру, заглавную и строчную букву, а также спецсимвол"
+                message = "The password must contain at least one digit, one uppercase letter, one lowercase letter, and one special character."
         )
         String password) {
 }

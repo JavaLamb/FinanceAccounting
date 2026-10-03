@@ -3,9 +3,9 @@ package main.dto.Request;
 import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequest(
-        @NotBlank(message = "Email не может быть пустым")
+        @NotBlank(message = "Email cannot be empty")
         String username,
 
-        @NotBlank(message = "Пароль не может быть пустым")
+        @NotBlank(message = "Password cannot be empty")
         String password) {
 }

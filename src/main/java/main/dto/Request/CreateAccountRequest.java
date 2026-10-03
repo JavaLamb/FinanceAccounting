@@ -7,10 +7,10 @@ import main.entities.AccountType;
 
 
 public record CreateAccountRequest(
-        @NotBlank(message = "Имя аккаунта не может быть пустым")
-        @Size(min = 1, max = 255, message = "Длина должна быть от {min} до {max} символов")
+        @NotBlank(message = "Account name cannot be empty")
+        @Size(min = 1, max = 255, message = "Length must be from {min} to {max} symbols")
         String name,
 
-        @NotNull(message = "Тип аккаунта не может быть пустым")
+        @NotNull(message = "Account type cannot be empty")
         AccountType accountType) {
 }

@@ -43,10 +43,10 @@ public class TransactionService {
                         String.valueOf(transactionId)
                 ));
         boolean Ok = false;
-        if (transaction.getFromAccount() != null && isOwner(transaction.getFromAccount(), userId)) {
+        if (transaction.getFromAccount() != null && transaction.getFromAccount().isOwner(userId)) {
             Ok = true;
         }
-        if (transaction.getToAccount() != null && isOwner(transaction.getToAccount(), userId)) {
+        if (transaction.getToAccount() != null && transaction.getToAccount().isOwner(userId)) {
             Ok = true;
         }
         if (!Ok) {
@@ -107,8 +107,8 @@ public class TransactionService {
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
-        boolean isFromOwner = fromAccount == null || isOwner(fromAccount, userId);
-        boolean isToOwner = toAccount == null || isOwner(toAccount, userId);
+        boolean isFromOwner = fromAccount == null || fromAccount.isOwner(userId);
+        boolean isToOwner = toAccount == null || toAccount.isOwner(userId);
         if (!isFromOwner || !isToOwner) {
             throw new BusinessLogicException(
                     "To change amount of transaction you must be the owner of both accounts",
@@ -146,8 +146,8 @@ public class TransactionService {
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
 
-        boolean isFromOwner = fromAccount == null || isOwner(fromAccount, userId);
-        boolean isToOwner = toAccount == null || isOwner(toAccount, userId);
+        boolean isFromOwner = fromAccount == null || fromAccount.isOwner(userId);
+        boolean isToOwner = toAccount == null || toAccount.isOwner(userId);
         if (!isFromOwner || !isToOwner) {
             throw new BusinessLogicException(
                     "To delete transaction you must be the owner of both accounts",
@@ -180,10 +180,6 @@ public class TransactionService {
             toAccount.setBalance(toAccount.getBalance().subtract(amount));
         }
         transactionRepository.delete(oldTransaction);
-    }
-
-    private boolean isOwner(@NotNull Account account, long userId) {
-        return account.getUser().getId() == userId;
     }
 
     private Transaction createIncome(Category category, BigDecimal amount, Account account) {

@@ -41,6 +41,10 @@ public class Account {
         this.accountType = accountType;
     }
 
+    public boolean isOwner(long userId){
+        return this.user.getId() == userId;
+    }
+
 
     @Override
     public String toString() {

@@ -1,6 +1,7 @@
 package main.service;
 
 import main.exceptions.BusinessLogicException;
+import main.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,16 @@ public class AccountService {
 
     @Transactional
     public void deactivateAccount(long accountId, long userId) {
-        accountRepository.deactivateByIdAndUserId(accountId, userId);
+        Account accountToDeactivate = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(() -> new ResourceNotFoundException(
+                "Account",
+                String.valueOf(accountId)
+        ));
+        if (!accountToDeactivate.isOwner(userId)) throw new BusinessLogicException(
+                "To delete account you must be the owner",
+                HttpStatus.FORBIDDEN,
+                "ACCESS_DENIED");
+
+        accountToDeactivate.setActive(false);
     }
 
     @Transactional(readOnly = true)

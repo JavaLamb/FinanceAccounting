@@ -1,11 +1,10 @@
-package main.service.categoryService;
+package main.service;
 
 import main.entities.Category;
 import main.entities.User;
 import main.exceptions.BusinessLogicException;
 import main.repositories.CategoryRepository;
 import main.repositories.UserRepository;
-import main.service.CategoryService;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;

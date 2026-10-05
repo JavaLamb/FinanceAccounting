@@ -1,4 +1,4 @@
-package main.service.userService;
+package main.service;
 
 import main.dto.Request.RegiRequest;
 import main.entities.User;
@@ -8,7 +8,6 @@ import main.repositories.UserRepository;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import main.service.UserService;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

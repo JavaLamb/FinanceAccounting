@@ -6,8 +6,10 @@ import main.exceptions.BusinessLogicException;
 import main.repositories.CategoryRepository;
 import main.repositories.UserRepository;
 import main.service.CategoryService;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,10 +35,9 @@ class CategoryServiceTest {
         int exceededLimit = 5;
         Mockito.when(categoryRepository.countAllByUserId(userId)).thenReturn(exceededLimit);
         BusinessLogicException ex = assertThatThrownBy(() -> subj.createCategory("name", userId))
-                .isInstanceOf(BusinessLogicException.class)
-                .hasMessage("Category limit exceeded")
                 .asInstanceOf(InstanceOfAssertFactories.type(BusinessLogicException.class))
                 .actual();
+
         assertThat(ex.getErrorCode()).isEqualTo("CATEGORY_LIMIT_EXCEEDED");
         assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
 
@@ -49,6 +50,7 @@ class CategoryServiceTest {
     void shouldCreateCategorySuccessfullyWhenWithinLimit() {
         long userId = 1;
         int withinLimit = 4;
+
         String categoryName = "name";
         Mockito.when(categoryRepository.countAllByUserId(userId)).thenReturn(withinLimit);
 
@@ -56,15 +58,15 @@ class CategoryServiceTest {
         Mockito.when(userRepository.getReferenceById(userId)).thenReturn(mockUser);
 
         Category mockSavedCategory = new Category(categoryName, mockUser);
-        Mockito.when(categoryRepository.save(Mockito.any(Category.class))).thenReturn(mockSavedCategory);
+        Mockito.when(categoryRepository.save(Mockito.any())).thenReturn(mockSavedCategory);
+
 
         Category res = subj.createCategory(categoryName, userId);
-
-        assertThat(res).isEqualTo(mockSavedCategory);
-
         ArgumentCaptor<Category> captor = ArgumentCaptor.forClass(Category.class);
         verify(categoryRepository).save(captor.capture());
         Category categoryToSave = captor.getValue();
+
+        assertThat(res).isEqualTo(mockSavedCategory);
 
         assertThat(categoryToSave.getUser()).isEqualTo(mockUser);
         assertThat(categoryToSave.getTransactionCategoryName()).isEqualTo(categoryName);

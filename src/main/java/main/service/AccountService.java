@@ -38,10 +38,10 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Account findByIdService(long accountId, long userId) {
         return accountRepository.findByIdAndUserIdAndActiveTrue(accountId, userId)
-                .orElseThrow(() -> new BusinessLogicException(
-                        "Account not found or access denied",
-                        HttpStatus.FORBIDDEN,
-                        "ACCESS_DENIED"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account",
+                        String.valueOf(accountId)
+                ));
     }
 
     @Transactional

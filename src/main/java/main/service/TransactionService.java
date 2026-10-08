@@ -29,8 +29,17 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public List<Transaction> findAllByAccId(long accountId, long userId) {
-        if (!accountRepository.existsByIdAndUserId(accountId, userId)) {
-            throw new ResourceNotFoundException("Account", String.valueOf(accountId)); //
+        Account account = accountRepository.findByIdAndActiveTrue(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account",
+                        String.valueOf(accountId)
+                ));
+        if (!account.isOwner(userId)) {
+            throw new BusinessLogicException(
+                    "You must be the owner of account",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            );
         }
         return transactionRepository.findAllByAccountIdAndUserIdWithCategory(accountId, userId);
     }
@@ -42,14 +51,11 @@ public class TransactionService {
                         "Transaction",
                         String.valueOf(transactionId)
                 ));
-        boolean Ok = false;
-        if (transaction.getFromAccount() != null && transaction.getFromAccount().isOwner(userId)) {
-            Ok = true;
-        }
-        if (transaction.getToAccount() != null && transaction.getToAccount().isOwner(userId)) {
-            Ok = true;
-        }
-        if (!Ok) {
+        Account fromAccount = transaction.getFromAccount();
+        Account toAccount = transaction.getToAccount();
+        boolean isFromOwner = fromAccount != null && fromAccount.isOwner(userId);
+        boolean isToOwner = toAccount != null && toAccount.isOwner(userId);
+        if (!isFromOwner && !isToOwner) {
             throw new BusinessLogicException(
                     "Transaction info is available to the participant only",
                     HttpStatus.FORBIDDEN,
@@ -62,14 +68,18 @@ public class TransactionService {
 
     @Transactional
     public Transaction createRegularTransaction(TransactionType transactionType, long categoryId, BigDecimal amount, long userId, long accountId) {
-        Account account = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(() -> new ResourceNotFoundException("Account", String.valueOf(accountId)));
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", String.valueOf(categoryId)));
-        if (category.getUser().getId() != userId) throw new BusinessLogicException(
+        Account account = accountRepository.findByIdAndActiveTrue(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account", String.valueOf(accountId)));
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category", String.valueOf(categoryId)));
+        if (!category.isUserOwner(userId)) throw new BusinessLogicException(
                 "To create a transaction, you must be the category owner",
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED"
         );
-        if (account.getUser().getId() != userId) throw new BusinessLogicException(
+        if (!account.isOwner(userId)) throw new BusinessLogicException(
                 "To create a transaction, you must be the account owner",
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED"
@@ -84,15 +94,23 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) throws AccountNotFoundException {
-        Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId).orElseThrow(() -> new ResourceNotFoundException("Account", String.valueOf(fromAccountId)));
-        Category category = categoryRepository.findByIdAndUserId(categoryId, userId).orElseThrow(() -> new ResourceNotFoundException("Category", String.valueOf(categoryId)));
+        Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account", String.valueOf(fromAccountId)));
+        Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category", String.valueOf(categoryId)));
         if (fromAccount.getUser().getId() != userId) throw new BusinessLogicException(
                 "The originating account must belong to the transfer originator",
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED");
         if (!isBalanceValid(fromAccount, amount))
             throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
-        Account toAccount = accountRepository.findByIdAndActiveTrue(toAccountId).orElseThrow(AccountNotFoundException::new);
+        Account toAccount = accountRepository.findByIdAndActiveTrue(toAccountId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account",
+                        String.valueOf(toAccountId)
+                ));
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
@@ -103,7 +121,10 @@ public class TransactionService {
     @Transactional
     public Transaction changeAmount(long userId, long transactionId, @NotNull BigDecimal newAmount) {
         Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Transaction",
+                        String.valueOf(transactionId)
+                ));
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
@@ -189,7 +210,9 @@ public class TransactionService {
 
     private Transaction createExpense(Category category, BigDecimal amount, Account account) {
         if (!isBalanceValid(account, amount))
-            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
+            throw new ValidationException(
+                    Map.of("amount",
+                            List.of("The amount of transaction exceeds the balance of account")));
         account.setBalance(account.getBalance().subtract(amount));
         return transactionRepository.save(new Transaction(TransactionType.EXPENSE, account, category, amount));
     }

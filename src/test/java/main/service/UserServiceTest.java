@@ -33,15 +33,14 @@ class UserServiceTest {
         RegiRequest request = new RegiRequest("email", "password");
         Mockito.when(userRepository.existsByEmail("email")).thenReturn(true);
 
-        ValidationException ex = assertThatThrownBy(() -> subj.registration(request))
+        assertThatThrownBy(() -> subj.registration(request))
                 .isInstanceOf(ValidationException.class)
                 .hasMessage("Validation failed")
-                .asInstanceOf(InstanceOfAssertFactories.type(ValidationException.class))
-                .actual();
-
-        assertThat(ex.getErrors().containsKey("username"));
-        assertThat(ex.getErrorCode()).isEqualTo("VALIDATION_ERROR");
-        assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                .hasFieldOrPropertyWithValue("errorCode", "VALIDATION_ERROR")
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                .extracting("errors")
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
+                .containsKey("username");
 
         verify(userRepository, never()).save(any());
         verify(encoder, never()).encode(any());

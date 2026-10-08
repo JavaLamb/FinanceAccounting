@@ -7,7 +7,6 @@ import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
 import main.repositories.AccountRepository;
 import main.repositories.UserRepository;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,12 +44,10 @@ class AccountServiceTest {
             Mockito.when(accountRepository.findByIdAndActiveTrue(accountId))
                     .thenReturn(Optional.empty());
 
-            ResourceNotFoundException ex = assertThatThrownBy(() -> subj.deactivateAccount(accountId, userId))
-                    .asInstanceOf(InstanceOfAssertFactories.type(ResourceNotFoundException.class))
-                    .actual();
-
-            assertThat(ex.getResourceId()).isEqualTo(String.valueOf(accountId));
-            assertThat(ex.getResourceType()).isEqualTo("Account");
+            assertThatThrownBy(() -> subj.deactivateAccount(accountId, userId))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasFieldOrPropertyWithValue("resourceId", String.valueOf(accountId))
+                    .hasFieldOrPropertyWithValue("resourceType", "Account");
         }
 
         @Test
@@ -63,12 +60,10 @@ class AccountServiceTest {
             Mockito.when(accountToDeactivate.isOwner(userId))
                     .thenReturn(false);
 
-            BusinessLogicException ex = assertThatThrownBy(() -> subj.deactivateAccount(accountId, userId))
-                    .asInstanceOf(InstanceOfAssertFactories.type(BusinessLogicException.class))
-                    .actual();
-
-            assertThat(ex.getErrorCode()).isEqualTo("ACCESS_DENIED");
-            assertThat(ex.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+            assertThatThrownBy(() -> subj.deactivateAccount(accountId, userId))
+                    .isInstanceOf(BusinessLogicException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", "ACCESS_DENIED")
+                    .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
 
             verify(accountToDeactivate, never()).setActive(anyBoolean());
         }
@@ -99,13 +94,11 @@ class AccountServiceTest {
             Mockito.when(accountRepository.findByIdAndUserIdAndActiveTrue(accountId, userId))
                     .thenReturn(Optional.empty());
 
-            ResourceNotFoundException ex = assertThatThrownBy(() -> subj.findByIdService(accountId, userId))
-                    .asInstanceOf(InstanceOfAssertFactories.type(ResourceNotFoundException.class))
-                    .actual();
-
-            assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-            assertThat(ex.getResourceType()).isEqualTo("Account");
-            assertThat(ex.getResourceId()).isEqualTo(String.valueOf(accountId));
+            assertThatThrownBy(() -> subj.findByIdService(accountId, userId))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND)
+                    .hasFieldOrPropertyWithValue("resourceType", "Account")
+                    .hasFieldOrPropertyWithValue("resourceId", String.valueOf(accountId));
         }
 
         @Test
@@ -138,12 +131,10 @@ class AccountServiceTest {
             String name = "name";
             Mockito.when(accountRepository.countAllByUserIdAndActiveTrue(userId))
                     .thenReturn(exceededLimit);
-            BusinessLogicException ex = assertThatThrownBy(() -> subj.createAccount(name, userId, AccountType.DEBIT))
-                    .asInstanceOf(InstanceOfAssertFactories.type(BusinessLogicException.class))
-                    .actual();
-
-            assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(ex.getErrorCode()).isEqualTo("ACCOUNT_LIMIT_EXCEEDED");
+            assertThatThrownBy(() -> subj.createAccount(name, userId, AccountType.DEBIT))
+                    .isInstanceOf(BusinessLogicException.class)
+                    .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                    .hasFieldOrPropertyWithValue("errorCode", "ACCOUNT_LIMIT_EXCEEDED");
 
             verifyNoInteractions(userRepository);
             verify(accountRepository, never()).save(any());
@@ -178,9 +169,9 @@ class AccountServiceTest {
 
     @Nested
     @DisplayName("Method: getAllByUserId")
-    class GetAllByUserId{
+    class GetAllByUserId {
         @Test
-        void shouldReturnActiveAccountsForUser(){
+        void shouldReturnActiveAccountsForUser() {
             long userId = 1L;
             Account account1 = mock(Account.class);
             Account account2 = mock(Account.class);

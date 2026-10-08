@@ -35,4 +35,8 @@ public class Category {
     public String toString() {
         return "Name ='" + transactionCategoryName + '\'';
     }
+
+    public boolean isUserOwner(long userId){
+        return this.user.getId() == userId;
+    }
 }

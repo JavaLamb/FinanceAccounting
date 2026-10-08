@@ -9,7 +9,6 @@ import main.repositories.UserRepository;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,12 +32,10 @@ class CategoryServiceTest {
         long userId = 1;
         int exceededLimit = 5;
         Mockito.when(categoryRepository.countAllByUserId(userId)).thenReturn(exceededLimit);
-        BusinessLogicException ex = assertThatThrownBy(() -> subj.createCategory("name", userId))
-                .asInstanceOf(InstanceOfAssertFactories.type(BusinessLogicException.class))
-                .actual();
-
-        assertThat(ex.getErrorCode()).isEqualTo("CATEGORY_LIMIT_EXCEEDED");
-        assertThat(ex.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThatThrownBy(() -> subj.createCategory("name", userId))
+                .isInstanceOf(BusinessLogicException.class)
+                .hasFieldOrPropertyWithValue("errorCode", "CATEGORY_LIMIT_EXCEEDED")
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST);
 
         verify(categoryRepository).countAllByUserId(userId);
         verify(categoryRepository, never()).save(any());

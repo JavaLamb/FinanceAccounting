@@ -9,18 +9,15 @@ import main.dto.Request.CreateTransferRequest;
 import main.dto.Response.TransactionResponse;
 import main.entities.Transaction;
 import main.service.TransactionService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.http.ResponseEntity.status;
 
 @Validated
 @RequestMapping("/transactions")
@@ -64,13 +61,9 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> createTransfer(@PathVariable("accountId") long fromAccountId,
                                                               @AuthenticationPrincipal CustomUserDetails userDetails,
                                                               @Validated @RequestBody CreateTransferRequest dto) {
-        try {
-            long userId = userDetails.getId();
-            Transaction newTransaction = transactionService.createTransfer(dto.toAccountId(), dto.amount(), dto.categoryId(), fromAccountId, userId);
-            return ok(converter.convert(newTransaction));
-        } catch (AccountNotFoundException e) {
-            return status(HttpStatus.BAD_REQUEST).build();
-        }
+        long userId = userDetails.getId();
+        Transaction newTransaction = transactionService.createTransfer(dto.toAccountId(), dto.amount(), dto.categoryId(), fromAccountId, userId);
+        return ok(converter.convert(newTransaction));
     }
 
     @PatchMapping("/{transactionId}")

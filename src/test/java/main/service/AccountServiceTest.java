@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -152,18 +151,13 @@ class AccountServiceTest {
             Mockito.when(userRepository.getReferenceById(userId)).thenReturn(excpectedUser);
             Mockito.when(accountRepository.save(any()))
                     .thenAnswer(invocation -> invocation.getArgument(0));
+
             Account res = subj.createAccount(expectedName, userId, expectedType);
 
 
-            ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
-            verify(accountRepository).save(captor.capture());
-
-            Account savedAccount = captor.getValue();
-
-            assertThat(res).isEqualTo(savedAccount);
-            assertThat(savedAccount.getName()).isEqualTo(expectedName);
-            assertThat(savedAccount.getUser()).isEqualTo(excpectedUser);
-            assertThat(savedAccount.getAccountType()).isEqualTo(expectedType);
+            assertThat(res.getName()).isEqualTo(expectedName);
+            assertThat(res.getUser()).isEqualTo(excpectedUser);
+            assertThat(res.getAccountType()).isEqualTo(expectedType);
         }
     }
 

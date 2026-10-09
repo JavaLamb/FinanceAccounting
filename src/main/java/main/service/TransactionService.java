@@ -15,7 +15,6 @@ import main.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -93,19 +92,22 @@ public class TransactionService {
 
 
     @Transactional
-    public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) throws AccountNotFoundException {
+    public Transaction createTransfer(Long toAccountId, BigDecimal amount, Long categoryId, long fromAccountId, long userId) {
         Account fromAccount = accountRepository.findByIdAndActiveTrue(fromAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Account", String.valueOf(fromAccountId)));
+                        "Account",
+                        String.valueOf(fromAccountId)));
         Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Category", String.valueOf(categoryId)));
-        if (fromAccount.getUser().getId() != userId) throw new BusinessLogicException(
+                        "Category",
+                        String.valueOf(categoryId)));
+        if (!fromAccount.isOwner(userId)) throw new BusinessLogicException(
                 "The originating account must belong to the transfer originator",
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED");
         if (!isBalanceValid(fromAccount, amount))
-            throw new ValidationException(Map.of("amount", List.of("The amount of transaction exceeds the balance of account")));
+            throw new ValidationException(Map.of("amount",
+                    List.of("The amount of transaction exceeds the balance of account")));
         Account toAccount = accountRepository.findByIdAndActiveTrue(toAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Account",
@@ -128,30 +130,21 @@ public class TransactionService {
         BigDecimal changeAmount = newAmount.subtract(oldTransaction.getAmount());
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
-        boolean isFromOwner = fromAccount == null || fromAccount.isOwner(userId);
-        boolean isToOwner = toAccount == null || toAccount.isOwner(userId);
-        if (!isFromOwner || !isToOwner) {
-            throw new BusinessLogicException(
-                    "To change amount of transaction you must be the owner of both accounts",
-                    HttpStatus.FORBIDDEN,
-                    "ACCESS_DENIED"
-            );
-        }
+        validateTransferOwnership(oldTransaction, userId);
+
         if (fromAccount != null) {
             if (fromAccount.getBalance().subtract(changeAmount).signum() < 0) {
-                throw new BusinessLogicException(
-                        "Impossible to change transaction amount: balance of account " + fromAccount.getName() + " will become negative",
-                        HttpStatus.BAD_REQUEST,
-                        "INSUFFICIENT_FUNDS");
+                throw new ValidationException(
+                        Map.of("Amount",
+                                List.of("Impossible to change transaction amount: balance of account " + fromAccount.getName() + " will become negative")));
             }
             fromAccount.setBalance(fromAccount.getBalance().subtract(changeAmount));
         }
         if (toAccount != null) {
             if (toAccount.getBalance().add(changeAmount).signum() < 0) {
-                throw new BusinessLogicException(
-                        "Impossible to change transaction amount: balance of account " + fromAccount.getName() + " will become negative",
-                        HttpStatus.BAD_REQUEST,
-                        "INSUFFICIENT_FUNDS");
+                throw new ValidationException(
+                        Map.of("Amount",
+                                List.of("Impossible to change transaction amount: balance of account " + toAccount.getName() + " will become negative")));
             }
             toAccount.setBalance((toAccount.getBalance().add(changeAmount)));
         }
@@ -162,20 +155,14 @@ public class TransactionService {
     @Transactional
     public void deleteTransaction(long transactionId, long userId) {
         Transaction oldTransaction = transactionRepository.findByIdWithAccounts(transactionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction", String.valueOf(transactionId)));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Transaction",
+                        String.valueOf(transactionId)));
         BigDecimal amount = oldTransaction.getAmount();
         Account fromAccount = oldTransaction.getFromAccount();
         Account toAccount = oldTransaction.getToAccount();
+        validateTransferOwnership(oldTransaction, userId);
 
-        boolean isFromOwner = fromAccount == null || fromAccount.isOwner(userId);
-        boolean isToOwner = toAccount == null || toAccount.isOwner(userId);
-        if (!isFromOwner || !isToOwner) {
-            throw new BusinessLogicException(
-                    "To delete transaction you must be the owner of both accounts",
-                    HttpStatus.FORBIDDEN,
-                    "ACCESS_DENIED"
-            );
-        }
         if (fromAccount == null) {
             if (toAccount.getBalance().subtract(amount).signum() < 0) {
                 throw new BusinessLogicException(
@@ -219,5 +206,19 @@ public class TransactionService {
 
     private boolean isBalanceValid(Account account, BigDecimal amount) {
         return account.getBalance().compareTo(amount) >= 0;
+    }
+
+    private void validateTransferOwnership(Transaction transaction, long userId){
+        Account fromAccount = transaction.getFromAccount();
+        Account toAccount = transaction.getToAccount();
+
+        if((fromAccount != null && !fromAccount.isOwner(userId))
+                || (toAccount != null && !toAccount.isOwner(userId))){
+            throw new BusinessLogicException(
+                    "You must be the owner of both accounts",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            );
+        }
     }
 }

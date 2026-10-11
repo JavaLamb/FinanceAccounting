@@ -280,12 +280,10 @@ class TransactionServiceTest {
 
         @Test
         void shouldThrowValidationExceptionWhenExpenseExceedsAccountBalance() {
-            Account mockAccount = new Account();
             User mockUser = mock(User.class);
-            mockAccount.setUser(mockUser);
+            Account mockAccount = createAccount(mockUser);
             Mockito.when(mockUser.getId())
                     .thenReturn(userId);
-            mockAccount.setBalance(BigDecimal.valueOf(100));
             BigDecimal exceededAmount = BigDecimal.valueOf(200);
             Category mockCategory = mock(Category.class);
             Mockito.when(accountRepository.findByIdAndActiveTrue(accountId))
@@ -310,12 +308,10 @@ class TransactionServiceTest {
 
         @Test
         void shouldCreateExpenseTransactionWhenUserOwnsAccountAndCategory() {
-            Account account = new Account();
-            account.setBalance(BigDecimal.valueOf(100));
             BigDecimal validAmount = BigDecimal.valueOf(10);
-
             User mockUser = mock(User.class);
-            account.setUser(mockUser);
+            Account account = createAccount(mockUser);
+
             Mockito.when(mockUser.getId())
                     .thenReturn(userId);
 
@@ -349,12 +345,9 @@ class TransactionServiceTest {
 
         @Test
         void shouldCreateIncomeTransactionWhenUserOwnsAccountAndCategory() {
-            Account account = new Account();
-            account.setBalance(BigDecimal.valueOf(100));
             BigDecimal validAmount = BigDecimal.valueOf(10);
-
             User mockUser = mock(User.class);
-            account.setUser(mockUser);
+            Account account = createAccount(mockUser);
             Mockito.when(mockUser.getId())
                     .thenReturn(userId);
 
@@ -443,12 +436,10 @@ class TransactionServiceTest {
 
         @Test
         void shouldThrowValidationExceptionWhenAmountExceedsBalanceOfFromAccount() {
-            Account fromAccount = new Account();
             User mockUser = mock(User.class);
+            Account fromAccount = createAccount(mockUser);
             Mockito.when(mockUser.getId())
                     .thenReturn(userId);
-            fromAccount.setBalance(BigDecimal.ONE);
-            fromAccount.setUser(mockUser);
             BigDecimal exceededAmount = fromAccount.getBalance().add(BigDecimal.ONE);
             Mockito.when(accountRepository.findByIdAndActiveTrue(fromAccountId))
                     .thenReturn(Optional.of(fromAccount));
@@ -730,31 +721,6 @@ class TransactionServiceTest {
             verifyNoMoreInteractions(transactionRepository);
         }
 
-        @Test
-        void shouldThrowBusinessLogicExceptionWhenToAccountBalanceGoesNegative() {
-            Transaction mockTransaction = mock(Transaction.class);
-            Account toAccount = mock(Account.class);
-            Mockito.when(transactionRepository.findByIdWithAccounts(transactionId))
-                    .thenReturn(Optional.of(mockTransaction));
-            Mockito.when(mockTransaction.getAmount())
-                    .thenReturn(BigDecimal.TEN);
-            Mockito.when(mockTransaction.getFromAccount())
-                            .thenReturn(null);
-            Mockito.when(mockTransaction.getToAccount())
-                    .thenReturn(toAccount);
-            Mockito.when(toAccount.isOwner(userId))
-                    .thenReturn(true);
-            Mockito.when(toAccount.getBalance())
-                    .thenReturn(BigDecimal.ZERO);
-
-            assertThatThrownBy(()-> subj.deleteTransaction(transactionId, userId))
-                    .isInstanceOf(BusinessLogicException.class)
-                    .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
-                    .hasFieldOrPropertyWithValue("errorCode", "INSUFFICIENT_FUNDS");
-
-            verifyNoMoreInteractions(transactionRepository);
-        }
-
         @ParameterizedTest(name = "fromExists = {0}, fromOwner = {1}, toExists = {2},  toOwner = {3}")
         @MethodSource("doesNotOwnsAllExistingAccounts")
         void shouldThrowBusinessLogicExceptionWhenUserDoesNotOwnsAllExistingAccounts(
@@ -790,9 +756,73 @@ class TransactionServiceTest {
             verify(transactionRepository, never()).delete(any());
         }
 
+        @Test
+        void shouldThrowBusinessLogicExceptionWhenTransactionIsIncomeAndToAccountBalanceGoesNegative() {
+            Transaction mockTransaction = mock(Transaction.class);
+            Account toAccount = mock(Account.class);
+            Mockito.when(transactionRepository.findByIdWithAccounts(transactionId))
+                    .thenReturn(Optional.of(mockTransaction));
+            Mockito.when(mockTransaction.getAmount())
+                    .thenReturn(BigDecimal.TEN);
+            Mockito.when(mockTransaction.getFromAccount())
+                    .thenReturn(null);
+            Mockito.when(mockTransaction.getToAccount())
+                    .thenReturn(toAccount);
+            Mockito.when(toAccount.getName())
+                    .thenReturn("name");
+            Mockito.when(toAccount.isOwner(userId))
+                    .thenReturn(true);
+            Mockito.when(toAccount.getBalance())
+                    .thenReturn(BigDecimal.ZERO);
+
+            assertThatThrownBy(() -> subj.deleteTransaction(transactionId, userId))
+                    .isInstanceOf(BusinessLogicException.class)
+                    .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                    .hasFieldOrPropertyWithValue("errorCode", "INSUFFICIENT_FUNDS")
+                    .hasFieldOrPropertyWithValue("message",
+                            "Impossible to delete transaction: balance of account "
+                                    + toAccount.getName() + " will become negative");
+
+            verifyNoMoreInteractions(transactionRepository);
+        }
+
+        @Test
+        void shouldThrowBusinessLogicExceptionWhenTransactionIsTransferAndToAccountBalanceGoesNegative() {
+            Transaction mockTransaction = mock(Transaction.class);
+            Account toAccount = mock(Account.class);
+            Account fromAccount = mock(Account.class);
+            Mockito.when(transactionRepository.findByIdWithAccounts(transactionId))
+                    .thenReturn(Optional.of(mockTransaction));
+            Mockito.when(mockTransaction.getAmount())
+                    .thenReturn(BigDecimal.TEN);
+            Mockito.when(mockTransaction.getFromAccount())
+                    .thenReturn(fromAccount);
+            Mockito.when(fromAccount.isOwner(userId))
+                    .thenReturn(true);
+            Mockito.when(mockTransaction.getToAccount())
+                    .thenReturn(toAccount);
+            Mockito.when(toAccount.getName())
+                    .thenReturn("name");
+            Mockito.when(toAccount.isOwner(userId))
+                    .thenReturn(true);
+            Mockito.when(toAccount.getBalance())
+                    .thenReturn(BigDecimal.ZERO);
+
+            assertThatThrownBy(() -> subj.deleteTransaction(transactionId, userId))
+                    .isInstanceOf(BusinessLogicException.class)
+                    .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                    .hasFieldOrPropertyWithValue("errorCode", "INSUFFICIENT_FUNDS")
+                    .hasFieldOrPropertyWithValue("message",
+                            "Impossible to delete transaction: balance of destination account "
+                                    + toAccount.getName() + " will become negative");
+
+            verifyNoMoreInteractions(transactionRepository);
+        }
+
+
         @ParameterizedTest(name = "fromExists = {0}, toExists = {1}")
         @MethodSource("ownsAllExistingAccounts")
-        void shouldChangeAmountWhenUserOwnsAllAccountsAndNewAmountIsValid(
+        void shouldDeleteWhenUserOwnsAllAccountsAndBalanceStayValid(
                 boolean fromExists,
                 boolean toExists) {
 
@@ -807,12 +837,11 @@ class TransactionServiceTest {
             transaction.setFromAccount(fromAccount);
             transaction.setToAccount(toAccount);
 
+
             when(transactionRepository.findByIdWithAccounts(transactionId))
                     .thenReturn(Optional.of(transaction));
 
-            subj.deleteTransaction(
-                    transactionId, userId
-            );
+            subj.deleteTransaction(transactionId, userId);
 
             if (fromAccount != null) {
                 assertThat(fromAccount.getBalance())
@@ -823,6 +852,7 @@ class TransactionServiceTest {
                 assertThat(toAccount.getBalance())
                         .isEqualByComparingTo(BigDecimal.valueOf(90));
             }
+            verify(transactionRepository).delete(transaction);
         }
     }
 }

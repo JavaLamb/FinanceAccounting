@@ -1,8 +1,7 @@
 package main.controllers;
 
-import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
-import main.config.CustomUserDetails;
+import main.security.CustomUserDetails;
 import main.converters.TransactionToTransactionResponseConverter;
 import main.dto.Request.CreateRegularTransactionRequest;
 import main.dto.Request.CreateTransferRequest;

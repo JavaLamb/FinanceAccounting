@@ -1,7 +1,7 @@
 package main.controllers;
 
 import lombok.RequiredArgsConstructor;
-import main.config.CustomUserDetails;
+import main.security.CustomUserDetails;
 import main.converters.CategoryToCategoryResponseConverter;
 import main.dto.Request.CategoryRequest;
 import main.dto.Response.CategoryResponse;

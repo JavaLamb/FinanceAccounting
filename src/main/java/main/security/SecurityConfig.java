@@ -1,4 +1,4 @@
-package main.config;
+package main.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,27 +34,34 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/registration", "/logout").permitAll()
-                        .requestMatchers("/accounts/**", "/transactions/**", "/categories/**" ).hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name()))
+                        .requestMatchers("/", "/login", "/registration", "/logout")
+                            .permitAll()
+                        .requestMatchers("/accounts/**", "/transactions/**", "/categories/**")
+                            .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
                 .build();
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return username -> {
             User user = userRepository
                     .findByEmail(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));
             Set<GrantedAuthority> role = Collections.singleton(user.getUserRole().toAuthority());
-            return new CustomUserDetails(user.getHashPassword(),user.getEmail(), role, user.getId());
+            return new CustomUserDetails(user.getHashPassword(), user.getEmail(), role, user.getId());
         };
     }
 

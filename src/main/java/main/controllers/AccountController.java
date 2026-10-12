@@ -1,7 +1,7 @@
 package main.controllers;
 
 import lombok.RequiredArgsConstructor;
-import main.config.CustomUserDetails;
+import main.security.CustomUserDetails;
 import main.converters.AccountToAccountResponseConverter;
 import main.dto.Request.CreateAccountRequest;
 import main.dto.Response.AccountsResponse;

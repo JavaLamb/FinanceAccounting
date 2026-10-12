@@ -1,4 +1,4 @@
-package main.config;
+package main.security;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -6,6 +6,7 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.entities.User;
 import main.exceptions.BusinessLogicException;
+import main.exceptions.ResourceNotFoundException;
 import main.security.SecurityConfig;
 import main.converters.AccountToAccountResponseConverter;
 import main.repositories.UserRepository;
@@ -53,6 +54,7 @@ class AccountControllerTest {
     ObjectMapper om;
 
     long userId = 1L;
+    long accountId = 10L;
 
     @Nested
     @DisplayName("GET /accounts")
@@ -224,21 +226,149 @@ class AccountControllerTest {
 
     }
 
+    @Nested
+    @DisplayName("DELETE /accounts/{id}")
+    class DeleteAccountByIdTests {
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenAccountInactiveOrDoesNotExist() throws Exception {
+            doThrow(new ResourceNotFoundException(
+                    "Account",
+                    String.valueOf(accountId)
+            )).when(accountService).deactivateAccount(accountId, userId);
+
+            mockMvc.perform(delete("/accounts/{id}", accountId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error")
+                            .value("RESOURCE_NOT_FOUND"));
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn403WhenUserNotOwner() throws Exception {
+            doThrow(new BusinessLogicException(
+                    "To delete account you must be the owner",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            )).when(accountService).deactivateAccount(accountId, userId);
+
+            mockMvc.perform(delete("/accounts/{id}", accountId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.error")
+                            .value("ACCESS_DENIED"));
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturnOk() throws Exception {
+            doNothing().when(accountService).deactivateAccount(accountId, userId);
+
+            mockMvc.perform(delete("/accounts/{id}", accountId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(accountService).deactivateAccount(accountId, userId);
+        }
+
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(delete("/accounts/1"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            doNothing().when(accountService).deactivateAccount(accountId, userId);
+
+            mockMvc.perform(delete("/accounts/lskjddahgask")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'id' should be of type long"));
+
+            verify(accountService, never()).deactivateAccount(anyLong(), anyLong());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /accounts/{id}")
+    class GetAccountByIdTests {
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenNotFoundOrNotBelongOrNotExist() throws Exception {
+            when(accountService.findByIdService(accountId, userId))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Account",
+                            String.valueOf(accountId)
+                    ));
+
+            mockMvc.perform(get("/accounts/{id}", accountId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound());
+
+            verify(accountService).findByIdService(accountId, userId);
+            verifyNoInteractions(converter);
+        }
+
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            mockMvc.perform(get("/accounts/lskjddahgask")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'id' should be of type long"));
+
+            verify(accountService, never()).findByIdService(anyLong(), anyLong());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturnOk() throws Exception {
+            Account account = mock(Account.class);
+            AccountsResponse response = AccountsResponse.builder()
+                    .id(10L)
+                    .name("name")
+                    .balance(BigDecimal.valueOf(10))
+                    .accountType(AccountType.SAVINGS)
+                    .build();
+            when(accountService.findByIdService(accountId, userId))
+                    .thenReturn(account);
+            when(converter.convert(account))
+                    .thenReturn(response);
+
+            mockMvc.perform(get("/accounts/{id}", accountId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(10))
+                    .andExpect(jsonPath("$.name").value("name"))
+                    .andExpect(jsonPath("$.balance").value(10))
+                    .andExpect(jsonPath("$.accountType").value("SAVINGS"));
+
+            verify(accountService).findByIdService(accountId, userId);
+        }
+
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(get("/accounts/1"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+
     private AccountsResponse createAccountResponse(long number) {
         return new AccountsResponse(
                 number,
                 "My account " + number,
                 BigDecimal.valueOf(number),
                 AccountType.SAVINGS);
-    }
-
-    private Account createTestAccount(long number, User user) {
-        return new Account().builder()
-                .id(number)
-                .name("name" + number)
-                .balance(BigDecimal.valueOf(number))
-                .user(user)
-                .accountType(AccountType.SAVINGS)
-                .build();
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAll(Exception ex, WebRequest request){
+    public ResponseEntity<ErrorResponse> handleAll(Exception ex, WebRequest request) {
         log.error("Unhandled Exception: {}", ex.getMessage(), ex);
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(Instant.now())
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessLogicException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessLogic(BusinessLogicException ex, WebRequest request){
+    public ResponseEntity<ErrorResponse> handleBusinessLogic(BusinessLogicException ex, WebRequest request) {
         log.warn("Business exception: {} - {}", ex.getErrorCode(), ex.getMessage());
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(Instant.now())
@@ -47,7 +48,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request){
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
         log.info("Resource not found: {} with id {}", ex.getResourceType(), ex.getResourceId());
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(Instant.now())
@@ -60,7 +61,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex, WebRequest request){
+    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex, WebRequest request) {
         log.info("Validation failed: p{}]", ex.getErrors());
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(Instant.now())
@@ -82,7 +83,7 @@ public class GlobalExceptionHandler {
                     .computeIfAbsent(fieldError.getField(), k -> new ArrayList<>())
                     .add(fieldError.getDefaultMessage());
         }
-        log.info("Request validation failed : {}",validationErrors);
+        log.info("Request validation failed : {}", validationErrors);
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.BAD_REQUEST.value())
@@ -103,6 +104,25 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("MALFORMED_REQUEST")
                 .message("Request body is malformed or missing")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
+        String expectedType = ex.getRequiredType() != null
+                ? ex.getRequiredType().getSimpleName()
+                : "unknown";
+
+        log.info("Type mismatch : parameter {} expected {}", ex.getName(), expectedType);
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("TYPE_MISMATCH")
+                .message(String.format("Parameter '%s' should be of type %s", ex.getName(), expectedType))
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 

@@ -23,15 +23,15 @@ public class AccountService {
 
     @Transactional
     public void deactivateAccount(long accountId, long userId) {
-        Account accountToDeactivate = accountRepository.findByIdAndActiveTrue(accountId).orElseThrow(() -> new ResourceNotFoundException(
-                "Account",
-                String.valueOf(accountId)
-        ));
+        Account accountToDeactivate = accountRepository.findByIdAndActiveTrue(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account",
+                        String.valueOf(accountId)
+                ));
         if (!accountToDeactivate.isOwner(userId)) throw new BusinessLogicException(
                 "To delete account you must be the owner",
                 HttpStatus.FORBIDDEN,
                 "ACCESS_DENIED");
-
         accountToDeactivate.setActive(false);
     }
 

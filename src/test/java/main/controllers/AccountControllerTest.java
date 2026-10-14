@@ -4,7 +4,6 @@ import main.dto.Request.CreateAccountRequest;
 import main.dto.Response.AccountsResponse;
 import main.entities.Account;
 import main.entities.AccountType;
-import main.entities.User;
 import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
 import main.security.SecurityConfig;
@@ -16,7 +15,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +37,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import(SecurityConfig.class)
 @WebMvcTest(AccountController.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AccountControllerTest {
     @MockitoBean
     UserRepository userRepository;
@@ -284,7 +281,7 @@ class AccountControllerTest {
         void shouldReturn400WhenIdIsInvalidType() throws Exception {
             doNothing().when(accountService).deactivateAccount(accountId, userId);
 
-            mockMvc.perform(delete("/accounts/lskjddahgask")
+            mockMvc.perform(delete("/accounts/NOT_VALID_FORMAT")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.error")
@@ -320,7 +317,7 @@ class AccountControllerTest {
         @Test
         @WithMockCustomUser
         void shouldReturn400WhenIdIsInvalidType() throws Exception {
-            mockMvc.perform(get("/accounts/lskjddahgask")
+            mockMvc.perform(get("/accounts/NOT_VALID_FORMAT")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.error")

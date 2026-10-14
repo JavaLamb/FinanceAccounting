@@ -20,7 +20,7 @@ public class UserService {
     @Transactional
     public User registration(RegiRequest request) {
         if (userRepository.existsByEmail(request.username())) {
-            throw new ValidationException(Map.of("username", List.of("Email is already taken")));
+            throw new ValidationException(Map.of("username", List.of("Email is already exists")));
         }
         User newUser = new User(request.username(), encoder.encode(request.password()));
         return userRepository.save(newUser);

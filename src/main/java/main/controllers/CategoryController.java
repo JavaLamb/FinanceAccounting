@@ -30,9 +30,10 @@ public class CategoryController {
     private final CategoryToCategoryResponseConverter converter;
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> findAllByUserIdService(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<List<CategoryResponse>> getAllCategories(@AuthenticationPrincipal CustomUserDetails userDetails){
         long userId = userDetails.getId();
-        List<CategoryResponse> list = categoryService.getCategoriesByUserId(userId).stream().map(converter::convert).toList();
+        List<CategoryResponse> list = categoryService.getCategoriesByUserId(userId)
+                .stream().map(converter::convert).toList();
         return ok(list);
     }
 

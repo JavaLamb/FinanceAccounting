@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<UserResponse> registration(@Validated @RequestBody RegiRequest request) {
-            return ok(converter.convert(userService.registration(request)));
+        return ok(converter.convert(userService.registration(request)));
     }
 
     @PostMapping("/login")

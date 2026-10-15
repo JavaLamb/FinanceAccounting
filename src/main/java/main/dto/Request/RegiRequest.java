@@ -13,7 +13,7 @@ public record RegiRequest(
         @NotBlank(message = "Password cannot be empty")
         @Size(min = 8, max = 32, message = "Length must be from {min} to {max} symbols")
         @Pattern(
-                regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).*$",
+                regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!.]).*$",
                 message = "The password must contain at least one digit, one uppercase letter, one lowercase letter, and one special character."
         )
         String password

@@ -14,7 +14,7 @@ public record CreateRegularTransactionRequest(
         @NotNull(message = "CategoryId cannot be empty")
         Long categoryId,
         @NotNull(message = "Amount cannot be empty")
-        @Positive
+        @Positive(message = "Amount should be positive")
         @DecimalMax(value = "1000000.00", message = "Maximum amount of single transaction is 1_000_000")
         @Digits(integer = 9, fraction = 2, message = "Incorrect format of amount")
         BigDecimal amount

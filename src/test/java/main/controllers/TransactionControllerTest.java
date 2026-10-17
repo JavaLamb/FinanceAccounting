@@ -67,7 +67,7 @@ class TransactionControllerTest {
         @Test
         @WithMockCustomUser
         void shouldReturn400WhenIdIsInvalidType() throws Exception {
-            mockMvc.perform(get("/transactions/accounts/NOT_VALID_FORMAT")
+            mockMvc.perform(get("/transactions/accounts/INVALID_TYPE")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.error")
@@ -420,6 +420,91 @@ class TransactionControllerTest {
     @DisplayName("GET /transactions/{transactionId}")
     class GetTransactionByIdTest {
 
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            mockMvc.perform(get("/transactions/INVALID_TYPE")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'transactionId' should be of type long"));
+
+            verify(transactionService, never()).getTransactionById(anyLong(), anyLong());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenAccountNotFound() throws Exception {
+            when(transactionService.getTransactionById(anyLong(), anyLong()))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Transaction",
+                            String.valueOf(transactionId)
+                    ));
+
+            mockMvc.perform(get("/transactions/2")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.error")
+                            .value("RESOURCE_NOT_FOUND"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Transaction not found with id " + transactionId));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn403WhenNoAccountsBelongToUser() throws Exception {
+            when(transactionService.getTransactionById(anyLong(), anyLong()))
+                    .thenThrow(new BusinessLogicException(
+                            "Transaction info is available to the participant only",
+                            HttpStatus.FORBIDDEN,
+                            "ACCESS_DENIED"
+                    ));
+
+            mockMvc.perform(get("/transactions/2")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.error")
+                            .value("ACCESS_DENIED"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Transaction info is available to the participant only"));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturnFoundTransaction() throws Exception {
+            Transaction transaction = mock(Transaction.class);
+
+            when(transactionService.getTransactionById(userId, transactionId))
+                    .thenReturn(transaction);
+            TransactionResponse response = createTransactionResponseExpense(999, accountId);
+            when(converter.convert(transaction))
+                    .thenReturn(response);
+
+
+            mockMvc.perform(get("/transactions/3")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(
+                            MediaType.APPLICATION_JSON
+                    ))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(999))
+                    .andExpect(jsonPath("$.fromAccountId").value(accountId))
+                    .andExpect(jsonPath("$.categoryName").value("categoryName 999"))
+                    .andExpect(jsonPath("$.amount").value(BigDecimal.valueOf(999)));
+        }
+
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(get("/transactions/1"))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Nested

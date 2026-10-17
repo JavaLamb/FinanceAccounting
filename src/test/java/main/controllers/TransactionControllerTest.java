@@ -2,6 +2,7 @@ package main.controllers;
 
 import main.converters.TransactionToTransactionResponseConverter;
 import main.dto.Request.CreateRegularTransactionRequest;
+import main.dto.Request.CreateTransferRequest;
 import main.dto.Response.TransactionResponse;
 import main.entities.Transaction;
 import main.entities.TransactionType;
@@ -45,6 +46,7 @@ class TransactionControllerTest {
     private final long accountId = 2L;
     private final long transactionId = 3L;
     private final long categoryId = 4L;
+    private final long toAccountId = 5L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -510,7 +512,227 @@ class TransactionControllerTest {
     @Nested
     @DisplayName("POST /transactions/accounts/{accountId}/transfer")
     class CreateTransferTests {
+        private static Stream<Arguments> provideInvalidDtoForNullCheck() {
+            return Stream.of(
+                    Arguments.of(
+                            new CreateTransferRequest(null, 4L, BigDecimal.valueOf(100)),
+                            "Destination account cannot be empty"),
+                    Arguments.of(
+                            new CreateTransferRequest(2L, null, BigDecimal.valueOf(100)),
+                            "CategoryId cannot be empty"),
+                    Arguments.of(
+                            new CreateTransferRequest(2L, 4L, null),
+                            "Amount cannot be empty")
+            );
+        }
 
+        private static Stream<Arguments> provideInvalidAmount() {
+            long categoryId = 4L;
+            long accountId = 2L;
+            return Stream.of(
+                    Arguments.of(
+                            new CreateTransferRequest(
+                                    accountId, categoryId, BigDecimal.ZERO),
+                            "Amount should be positive"),
+                    Arguments.of(
+                            new CreateTransferRequest(
+                                    accountId, categoryId, null),
+                            "Amount cannot be empty"),
+                    Arguments.of(
+                            new CreateTransferRequest(
+                                    accountId, categoryId, BigDecimal.valueOf(10.123)),
+                            "Incorrect format of amount"),
+                    Arguments.of(
+                            new CreateTransferRequest(
+                                    accountId, categoryId, BigDecimal.valueOf(1000000000.00)),
+                            "Incorrect format of amount"),
+                    Arguments.of(
+                            new CreateTransferRequest(
+                                    accountId, categoryId, BigDecimal.valueOf(1000000.01)),
+                            "Maximum amount of single transfer is 1_000_000")
+            );
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            mockMvc.perform(post("/transactions/accounts/INVALID_TYPE/transfer")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'accountId' should be of type long"));
+
+            verify(transactionService, never()).createTransfer(anyLong(), any(), anyLong(), anyLong(), anyLong());
+        }
+
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(post("/transactions/accounts/{}/transfer", accountId))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideInvalidDtoForNullCheck")
+        @WithMockCustomUser
+        void shouldReturn400WhenDtoFieldIsNull(CreateTransferRequest request, String message) throws Exception {
+            String jsonBody = om.writeValueAsString(request);
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonBody))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(containsString(message)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideInvalidAmount")
+        @WithMockCustomUser
+        void shouldReturn400WhenAmountInvalid(CreateTransferRequest request, String message) throws Exception {
+            String jsonBody = om.writeValueAsString(request);
+
+            mockMvc.perform(post("/transactions/accounts/999/transfer")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonBody))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(containsString(message)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenFromAccountNotFound() throws Exception {
+            long fromAccountId = accountId;
+            CreateTransferRequest request = createTransferRequest(BigDecimal.valueOf(200), toAccountId);
+
+            when(transactionService.createTransfer(any(), eq(BigDecimal.valueOf(200)), any(), eq(fromAccountId), anyLong()))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Account", String.valueOf(fromAccountId)));
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", fromAccountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(containsString("Account not found with id " + fromAccountId)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenCategoryNotFoundOrNotBelongToUser() throws Exception {
+            CreateTransferRequest request = createTransferRequest(BigDecimal.valueOf(200), toAccountId);
+
+            when(transactionService.createTransfer(any(), eq(BigDecimal.valueOf(200)), eq(categoryId), anyLong(), anyLong()))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Category", String.valueOf(categoryId)));
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(containsString("Category not found with id " + categoryId)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn403WhenUserNotFromAccountOwner() throws Exception {
+            CreateTransferRequest request = createTransferRequest(BigDecimal.valueOf(200), toAccountId);
+
+            when(transactionService.createTransfer(eq(toAccountId), eq(BigDecimal.valueOf(200)), any(), eq(accountId), anyLong()))
+                    .thenThrow(new BusinessLogicException(
+                            "The originating account must belong to the transfer originator",
+                            HttpStatus.FORBIDDEN,
+                            "ACCESS_DENIED"));
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().string(containsString("ACCESS_DENIED")))
+                    .andExpect(jsonPath("$.message")
+                            .value("The originating account must belong to the transfer originator"));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenAmountExceedsFromAccountBalance() throws Exception {
+            CreateTransferRequest request = createTransferRequest(BigDecimal.valueOf(200), toAccountId);
+
+            when(transactionService.createTransfer(eq(toAccountId), eq(BigDecimal.valueOf(200)), any(), eq(accountId), anyLong()))
+                    .thenThrow(new ValidationException(Map.of("amount",
+                            List.of("The amount of transaction exceeds the balance of account"))));
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(containsString("VALIDATION_ERROR")))
+                    .andExpect(jsonPath("$.message")
+                            .value("Validation failed"))
+                    .andExpect(jsonPath("$.validationErrors.amount")
+                            .value("The amount of transaction exceeds the balance of account"));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenToAccountNotFound() throws Exception {
+            long fromAccountId = accountId;
+            CreateTransferRequest request = createTransferRequest(BigDecimal.valueOf(200), toAccountId);
+
+            when(transactionService.createTransfer(eq(toAccountId), eq(BigDecimal.valueOf(200)), any(), eq(fromAccountId), anyLong()))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Account", String.valueOf(toAccountId)));
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", fromAccountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(containsString("Account not found with id " + toAccountId)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn200AndCreatedTransfer() throws Exception {
+            CreateTransferRequest request = createTransferRequest(BigDecimal.TEN, toAccountId);
+            Transaction transaction = mock(Transaction.class);
+            TransactionResponse response = TransactionResponse.builder()
+                    .id(transactionId)
+                    .transactionType(TransactionType.TRANSFER)
+                    .fromAccountId(accountId)
+                    .toAccountId(toAccountId)
+                    .categoryName("categoryName")
+                    .amount(BigDecimal.TEN)
+                    .dateTime(Instant.now())
+                    .build();
+            when(transactionService.createTransfer(toAccountId, BigDecimal.TEN, categoryId, accountId, userId))
+                    .thenReturn(transaction);
+            when(converter.convert(transaction))
+                    .thenReturn(response);
+
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(transactionId))
+                    .andExpect(jsonPath("$.transactionType").value(TransactionType.TRANSFER.name()))
+                    .andExpect(jsonPath("$.toAccountId").value(toAccountId))
+                    .andExpect(jsonPath("$.fromAccountId").value(accountId))
+                    .andExpect(jsonPath("$.categoryName").value("categoryName"))
+                    .andExpect(jsonPath("$.amount").value(BigDecimal.TEN));
+        }
     }
 
     @Nested
@@ -523,6 +745,14 @@ class TransactionControllerTest {
     @DisplayName("DELETE /transactions/{transactionId}")
     class RollbackExistingTransactionTests {
 
+    }
+
+    private CreateTransferRequest createTransferRequest(BigDecimal amount, long toAccountId) {
+        return new CreateTransferRequest(
+                toAccountId,
+                categoryId,
+                amount
+        );
     }
 
     private TransactionResponse createTransactionResponseExpense(long number, long accountId) {

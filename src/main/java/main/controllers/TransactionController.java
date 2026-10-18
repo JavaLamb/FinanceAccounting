@@ -81,7 +81,6 @@ public class TransactionController {
         long userId = userDetails.getId();
         transactionService.deleteTransaction(transactionId, userId);
         return ok().build();
-
     }
 
 }

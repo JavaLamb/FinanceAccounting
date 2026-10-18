@@ -901,6 +901,86 @@ class TransactionControllerTest {
     @Nested
     @DisplayName("DELETE /transactions/{transactionId}")
     class RollbackExistingTransactionTests {
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(delete("/transactions/{transactionId}", transactionId))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            mockMvc.perform(delete("/transactions/INVALID_TYPE")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'transactionId' should be of type long"));
+
+            verify(transactionService, never()).deleteTransaction(anyLong(), anyLong());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenTransactionNotFound() throws Exception {
+            doThrow(new ResourceNotFoundException(
+                    "Transaction",
+                    String.valueOf(transactionId)))
+                    .when(transactionService).deleteTransaction(anyLong(), anyLong());
+
+            mockMvc.perform(delete("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(
+                            containsString("Transaction not found with id " + transactionId)));
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenUserNotOwnAllAccounts() throws Exception {
+            doThrow(new BusinessLogicException(
+                    "You must be the owner of both accounts",
+                    HttpStatus.FORBIDDEN,
+                    "ACCESS_DENIED"
+            )).when(transactionService).deleteTransaction(anyLong(), anyLong());
+
+            mockMvc.perform(delete("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().string(
+                            containsString("ACCESS_DENIED")));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenChangeLeadToNegativeBalanceOfAnyAccount() throws Exception {
+            doThrow(new ValidationException(
+                    Map.of("Amount",
+                            List.of("Impossible to change transaction amount: balance of account "
+                                    + "testAccountName will become negative"))))
+                    .when(transactionService).deleteTransaction(anyLong(), anyLong());
+
+            mockMvc.perform(delete("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(
+                            containsString("Impossible to change transaction amount: " +
+                                    "balance of account testAccountName will become negative")))
+                    .andExpect(content().string(containsString("VALIDATION_ERROR")));
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn200AndChangedTransaction() throws Exception {
+            mockMvc.perform(delete("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            verify(transactionService).deleteTransaction(transactionId, userId);
+        }
 
     }
 

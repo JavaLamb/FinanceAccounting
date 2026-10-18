@@ -1,6 +1,7 @@
 package main.controllers;
 
 import main.converters.TransactionToTransactionResponseConverter;
+import main.dto.Request.ChangeTransactionRequest;
 import main.dto.Request.CreateRegularTransactionRequest;
 import main.dto.Request.CreateTransferRequest;
 import main.dto.Response.TransactionResponse;
@@ -739,6 +740,162 @@ class TransactionControllerTest {
     @DisplayName("PATCH /transactions/{transactionId}")
     class ChangeAmountOfTransactionTests {
 
+        private static Stream<Arguments> provideInvalidAmount() {
+            return Stream.of(
+                    Arguments.of(
+                            new ChangeTransactionRequest(
+                                    BigDecimal.ZERO),
+                            "Amount should be positive"),
+                    Arguments.of(
+                            new ChangeTransactionRequest(
+                                    null),
+                            "Amount cannot be empty"),
+                    Arguments.of(
+                            new ChangeTransactionRequest(
+                                    BigDecimal.valueOf(10.123)),
+                            "Incorrect format of amount"),
+                    Arguments.of(
+                            new ChangeTransactionRequest(
+                                    BigDecimal.valueOf(1000000000.00)),
+                            "Incorrect format of amount"),
+                    Arguments.of(
+                            new ChangeTransactionRequest(
+                                    BigDecimal.valueOf(1000000.01)),
+                            "Maximum amount of single transaction is 1_000_000")
+            );
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenIdIsInvalidType() throws Exception {
+            mockMvc.perform(patch("/transactions/INVALID_TYPE")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error")
+                            .value("TYPE_MISMATCH"))
+                    .andExpect(jsonPath("$.message")
+                            .value("Parameter 'transactionId' should be of type long"));
+
+            verify(transactionService, never()).changeAmount(anyLong(), anyLong(), any(BigDecimal.class));
+        }
+
+        @Test
+        void shouldReturn401WhenUnauthorized() throws Exception {
+            mockMvc.perform(patch("/transactions/{transactionId}", transactionId))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideInvalidAmount")
+        @WithMockCustomUser
+        void shouldReturn400WhenAmountInvalid(ChangeTransactionRequest request, String message) throws Exception {
+            String jsonBody = om.writeValueAsString(request);
+
+            mockMvc.perform(patch("/transactions/999")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonBody))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(containsString(message)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn404WhenTransactionNotFound() throws Exception {
+            ChangeTransactionRequest request = new ChangeTransactionRequest(BigDecimal.TEN);
+
+            when(transactionService.changeAmount(anyLong(), anyLong(), any(BigDecimal.class)))
+                    .thenThrow(new ResourceNotFoundException(
+                            "Transaction",
+                            String.valueOf(transactionId)
+                    ));
+
+            mockMvc.perform(patch("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string(
+                            containsString("Transaction not found with id " + transactionId)));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenChangeLeadToNegativeBalanceOfAnyAccount() throws Exception {
+            ChangeTransactionRequest request = new ChangeTransactionRequest(BigDecimal.TEN);
+
+            when(transactionService.changeAmount(anyLong(), anyLong(), any(BigDecimal.class)))
+                    .thenThrow(new ValidationException(
+                            Map.of("Amount",
+                                    List.of("Impossible to change transaction amount: balance of account "
+                                            + "testAccountName will become negative"))));
+
+            mockMvc.perform(patch("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(
+                            containsString("Impossible to change transaction amount: " +
+                                    "balance of account testAccountName will become negative")))
+                    .andExpect(content().string(containsString("VALIDATION_ERROR")));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn400WhenUserNotOwnAllAccounts() throws Exception {
+            ChangeTransactionRequest request = new ChangeTransactionRequest(BigDecimal.TEN);
+
+            when(transactionService.changeAmount(anyLong(), anyLong(), any(BigDecimal.class)))
+                    .thenThrow(new BusinessLogicException(
+                            "You must be the owner of both accounts",
+                            HttpStatus.FORBIDDEN,
+                            "ACCESS_DENIED"
+                    ));
+
+            mockMvc.perform(patch("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(content().string(
+                            containsString("ACCESS_DENIED")));
+
+            verify(converter, never()).convert(any());
+        }
+
+        @Test
+        @WithMockCustomUser
+        void shouldReturn200AndChangedTransaction() throws Exception {
+            ChangeTransactionRequest request = new ChangeTransactionRequest(BigDecimal.ONE);
+            Transaction transaction = mock(Transaction.class);
+            TransactionResponse response = TransactionResponse.builder()
+                    .id(transactionId)
+                    .transactionType(TransactionType.TRANSFER)
+                    .fromAccountId(accountId)
+                    .toAccountId(toAccountId)
+                    .categoryName("categoryName")
+                    .amount(BigDecimal.ONE)
+                    .dateTime(Instant.now())
+                    .build();
+            when(transactionService.changeAmount(userId, transactionId, BigDecimal.ONE))
+                    .thenReturn(transaction);
+            when(converter.convert(transaction))
+                    .thenReturn(response);
+
+            mockMvc.perform(patch("/transactions/{transactionId}", transactionId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(om.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(transactionId))
+                    .andExpect(jsonPath("$.transactionType").value(TransactionType.TRANSFER.name()))
+                    .andExpect(jsonPath("$.toAccountId").value(toAccountId))
+                    .andExpect(jsonPath("$.fromAccountId").value(accountId))
+                    .andExpect(jsonPath("$.categoryName").value("categoryName"))
+                    .andExpect(jsonPath("$.amount").value(BigDecimal.ONE));
+        }
     }
 
     @Nested

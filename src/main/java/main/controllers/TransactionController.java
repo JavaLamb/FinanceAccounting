@@ -1,6 +1,7 @@
 package main.controllers;
 
 import lombok.RequiredArgsConstructor;
+import main.dto.Request.ChangeTransactionRequest;
 import main.security.CustomUserDetails;
 import main.converters.TransactionToTransactionResponseConverter;
 import main.dto.Request.CreateRegularTransactionRequest;
@@ -68,9 +69,9 @@ public class TransactionController {
     @PatchMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> changeAmountOfTransaction(@PathVariable("transactionId") long transactionId,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                         @Validated @RequestBody BigDecimal newAmount) {
+                                                                         @Validated @RequestBody ChangeTransactionRequest newAmount) {
         long userId = userDetails.getId();
-        Transaction newTransaction = transactionService.changeAmount(userId, transactionId, newAmount);
+        Transaction newTransaction = transactionService.changeAmount(userId, transactionId, newAmount.amount());
         return ok().body(converter.convert(newTransaction));
     }
 

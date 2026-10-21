@@ -11,7 +11,7 @@ public class CategoryToCategoryResponseConverter implements Converter<Category, 
     public CategoryResponse convert(Category source) {
         return CategoryResponse.builder()
                 .id(source.getId())
-                .categoryName(source.getTransactionCategoryName())
+                .categoryName(source.getName())
                 .build();
     }
 }

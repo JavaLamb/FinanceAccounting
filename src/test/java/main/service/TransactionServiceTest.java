@@ -64,7 +64,7 @@ class TransactionServiceTest {
                     .thenReturn(Optional.of(mockAccount));
             Mockito.when(mockAccount.isOwner(userId))
                     .thenReturn(true);
-            Mockito.when(transactionRepository.findAllByAccountIdAndUserIdWithCategory(accountId, userId))
+            Mockito.when(transactionRepository.findAllByAccountIdWithCategory(accountId))
                     .thenReturn(expectedList);
 
             List<Transaction> res = subj.findAllByAccId(accountId, userId);

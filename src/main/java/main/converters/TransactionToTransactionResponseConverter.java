@@ -12,7 +12,7 @@ public class TransactionToTransactionResponseConverter implements Converter<Tran
         return TransactionResponse.builder()
                 .id(source.getId())
                 .transactionType(source.getTransactionType())
-                .categoryName(source.getCategory().getTransactionCategoryName())
+                .categoryName(source.getCategory().getName())
                 .amount(source.getAmount())
                 .dateTime(source.getDateTime())
                 .fromAccountId(source.getFromAccount() != null ? source.getFromAccount().getId() : null)

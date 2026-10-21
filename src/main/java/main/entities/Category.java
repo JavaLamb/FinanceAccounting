@@ -16,7 +16,7 @@ public class Category {
     private long id;
 
     @Column(name = "transaction_name")
-    private String transactionCategoryName;
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -26,14 +26,14 @@ public class Category {
     )
     private User user;
 
-    public Category(String transactionCategoryName, User user) {
-        this.transactionCategoryName = transactionCategoryName;
+    public Category(String name, User user) {
+        this.name = name;
         this.user = user;
     }
 
     @Override
     public String toString() {
-        return "Name ='" + transactionCategoryName + '\'';
+        return "Name ='" + name + '\'';
     }
 
     public boolean isUserOwner(long userId){

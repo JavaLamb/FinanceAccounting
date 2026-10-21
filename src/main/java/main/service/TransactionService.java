@@ -40,7 +40,7 @@ public class TransactionService {
                     "ACCESS_DENIED"
             );
         }
-        return transactionRepository.findAllByAccountIdAndUserIdWithCategory(accountId, userId);
+        return transactionRepository.findAllByAccountIdWithCategory(accountId);
     }
 
     @Transactional(readOnly = true)

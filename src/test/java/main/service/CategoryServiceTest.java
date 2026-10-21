@@ -65,6 +65,6 @@ class CategoryServiceTest {
         assertThat(res).isEqualTo(mockSavedCategory);
 
         assertThat(categoryToSave.getUser()).isEqualTo(mockUser);
-        assertThat(categoryToSave.getTransactionCategoryName()).isEqualTo(categoryName);
+        assertThat(categoryToSave.getName()).isEqualTo(categoryName);
     }
 }

@@ -66,7 +66,14 @@ public class TransactionRepositoryTest {
         );
         mainTransaction = transactionRepository.save(mainTransaction);
 
-        Account foreignAccount = new Account("Foreign Account", testUser, AccountType.DEBIT);
+        Account foreignAccount = Account.builder()
+                .name("Foreign Account")
+                .user(testUser)
+                .accountType(AccountType.DEBIT)
+                .build();
+
+        foreignAccount = accountRepository.save(foreignAccount);
+
         foreignAccount = accountRepository.save(foreignAccount);
 
         Transaction foreignTransaction = new Transaction(

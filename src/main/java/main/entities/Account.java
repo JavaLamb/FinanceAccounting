@@ -22,6 +22,7 @@ public class Account {
     private String name;
 
     @Column(name = "balance", nullable = false)
+    @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +34,7 @@ public class Account {
     private AccountType accountType;
 
     @Column(name = "active", nullable = false)
+    @Builder.Default
     private boolean active = true;
 
 

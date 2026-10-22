@@ -43,10 +43,10 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public Transaction(TransactionType transactionType, Account AccountId, Category category, BigDecimal amount) {
+    public Transaction(TransactionType transactionType, Account Account, Category category, BigDecimal amount) {
         switch (transactionType) {
-            case TransactionType.INCOME -> this.toAccount = AccountId;
-            case TransactionType.EXPENSE -> this.fromAccount = AccountId;
+            case TransactionType.INCOME -> this.toAccount = Account;
+            case TransactionType.EXPENSE -> this.fromAccount = Account;
         }
         this.transactionType = transactionType;
         this.category = category;

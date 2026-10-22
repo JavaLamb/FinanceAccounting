@@ -234,14 +234,30 @@ Liquibase применяет миграции при запуске. Hibernate �
 Из корневой директории проекта:
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
 ### Run Tests
 
 ```bash
-mvn test
+./mvnw test
 ```
+
+Проект использует **JaCoCo** для анализа покрытия кода тестами.
+
+## Покрытие тестами (JaCoCo)
+
+| Пакет | Покрытие (Instructions) | Покрытие (Branches) |
+| :--- | :---: | :---: |
+| **Total (Всего)** | **90%** | **89%** |
+| `main.controllers` | 100% | n/a |
+| `main.service` | 99% | 100% |
+| `main.exceptions` | 91% | 75% |
+| `main.entities` | 84% | 69% |
+| `main.security` | 74% | n/a |
+| `main.converters` | 14% | 0% |
+
+
 
 ## Possible Improvements/Work in progress
 

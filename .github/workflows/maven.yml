@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@v4
@@ -22,3 +23,22 @@ jobs:
         
     - name: Build with Maven and Run Tests
       run: mvn -B clean verify
+      
+    - name: Generate JaCoCo Badge
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        generate-branches-badge: true
+        jacoco-csv-file: target/site/jacoco/jacoco.csv
+
+    - name: Log badge commit
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .github/badges/*.svg
+        git diff --staged --quiet || git commit -m "ci: update jacoco badges [skip ci]"
+        
+    - name: Push badge changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}

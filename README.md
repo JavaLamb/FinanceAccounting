@@ -247,17 +247,8 @@ Liquibase применяет миграции при запуске. Hibernate �
 
 ## Покрытие тестами (JaCoCo)
 
-| Пакет | Покрытие (Instructions) | Покрытие (Branches) |
-| :--- | :---: | :---: |
-| **Total (Всего)** | **90%** | **89%** |
-| `main.controllers` | 100% | n/a |
-| `main.service` | 99% | 100% |
-| `main.exceptions` | 91% | 75% |
-| `main.entities` | 84% | 69% |
-| `main.security` | 74% | n/a |
-| `main.converters` | 14% | 0% |
-
-
+![JaCoCo Instruction Coverage](.github/badges/jacoco.svg)
+![JaCoCo Branch Coverage](.github/badges/branches.svg)
 
 ## Possible Improvements/Work in progress
 

@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import main.converters.UserToUserResponseConverter;
+import main.dto.Response.LoginResponse;
+import main.security.CustomUserDetails;
+import main.security.JwtService;
 import main.service.UserService;
 import main.dto.Request.LoginRequest;
 import main.dto.Request.RegiRequest;
@@ -29,21 +32,31 @@ public class AuthController {
     private final UserToUserResponseConverter converter;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final JwtService jwtService;
 
     @PostMapping("/registration")
     public ResponseEntity<UserResponse> registration(@Validated @RequestBody RegiRequest request) {
         return ok(converter.convert(userService.registration(request)));
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<Void> authorization(@Validated @RequestBody LoginRequest loginRequest,
-                                              HttpServletRequest request,
-                                              HttpServletResponse response) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
-        return noContent().build();
+    public ResponseEntity<LoginResponse> authorization(
+            @Validated @RequestBody LoginRequest loginRequest) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.username(),
+                        loginRequest.password()
+                )
+        );
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        String accessToken = jwtService.generateAccessToken(
+                userDetails.getId().toString());
+
+        return ResponseEntity.ok(new LoginResponse(accessToken));
     }
 }

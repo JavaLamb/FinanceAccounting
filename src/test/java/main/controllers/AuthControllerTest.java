@@ -7,6 +7,8 @@ import main.dto.Response.UserResponse;
 import main.entities.User;
 import main.exceptions.ValidationException;
 import main.repositories.UserRepository;
+import main.security.CustomUserDetails;
+import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.service.UserService;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +58,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private UserToUserResponseConverter converter;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @MockitoBean
     private AuthenticationManager authenticationManager;
@@ -204,19 +209,26 @@ class AuthControllerTest {
         }
 
         @Test
-        void shouldReturn204WhenSuccess() throws Exception {
+        void shouldReturn200WhenSuccess() throws Exception {
             LoginRequest loginRequest = new LoginRequest("user", "password");
             Authentication mockAuthentication = mock(Authentication.class);
 
+            CustomUserDetails mockUserDetails = mock(CustomUserDetails.class);
+            when(mockUserDetails.getId())
+                    .thenReturn(123L);
+            when(mockAuthentication.getPrincipal())
+                    .thenReturn(mockUserDetails);
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(mockAuthentication);
+
+            String fakeToken = "mocked-jwt-token-string";
+            when(jwtService.generateAccessToken("123")).thenReturn(fakeToken);
 
             mockMvc.perform(post("/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(om.writeValueAsString(loginRequest)))
-                    .andExpect(status().isNoContent());
-
-            verify(securityContextRepository, times(1)).saveContext(any(), any(), any());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.accessToken").value(fakeToken));
         }
 
         @Test

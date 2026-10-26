@@ -10,6 +10,7 @@ import main.entities.TransactionType;
 import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
 import main.exceptions.ValidationException;
+import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.repositories.UserRepository;
 import main.security.WithMockCustomUser;
@@ -52,6 +53,7 @@ class TransactionControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+
     @Autowired
     private ObjectMapper om;
 
@@ -60,6 +62,9 @@ class TransactionControllerTest {
 
     @MockitoBean
     private TransactionService transactionService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @MockitoBean
     private TransactionToTransactionResponseConverter converter;

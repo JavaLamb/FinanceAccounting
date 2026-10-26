@@ -6,6 +6,7 @@ import main.dto.Response.CategoryResponse;
 import main.entities.Category;
 import main.exceptions.BusinessLogicException;
 import main.repositories.UserRepository;
+import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.security.WithMockCustomUser;
 import main.service.CategoryService;
@@ -52,6 +53,9 @@ class CategoryControllerTest {
 
     @MockitoBean
     private CategoryToCategoryResponseConverter converter;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @Nested
     @DisplayName("GET /categories")

@@ -5,18 +5,22 @@ import lombok.RequiredArgsConstructor;
 import main.entities.User;
 import main.entities.UserRole;
 import main.repositories.UserRepository;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
@@ -28,11 +32,14 @@ import java.util.Set;
 @EnableWebSecurity
 public class SecurityConfig {
     private final UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/registration", "/logout")
                             .permitAll()
@@ -47,6 +54,17 @@ public class SecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) ->
                                 response.setStatus(HttpServletResponse.SC_NO_CONTENT)))
                 .build();
+    }
+
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
+            JwtAuthenticationFilter filter
+    ) {
+        FilterRegistrationBean<JwtAuthenticationFilter> registration =
+                new FilterRegistrationBean<>(filter);
+
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean

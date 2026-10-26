@@ -6,6 +6,7 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
+import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.converters.AccountToAccountResponseConverter;
 import main.repositories.UserRepository;
@@ -44,6 +45,8 @@ class AccountControllerTest {
     AccountService accountService;
     @MockitoBean
     AccountToAccountResponseConverter converter;
+    @MockitoBean
+    JwtService jwtService;
 
     @Autowired
     MockMvc mockMvc;

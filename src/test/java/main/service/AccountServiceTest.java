@@ -158,6 +158,7 @@ class AccountServiceTest {
             assertThat(res.getName()).isEqualTo(expectedName);
             assertThat(res.getUser()).isEqualTo(excpectedUser);
             assertThat(res.getAccountType()).isEqualTo(expectedType);
+            assertThat(res.isActive()).isTrue();
         }
     }
 

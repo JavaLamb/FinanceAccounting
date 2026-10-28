@@ -74,8 +74,6 @@ public class TransactionRepositoryTest {
 
         foreignAccount = accountRepository.save(foreignAccount);
 
-        foreignAccount = accountRepository.save(foreignAccount);
-
         Transaction foreignTransaction = new Transaction(
                 TransactionType.EXPENSE, foreignAccount, null, category, new BigDecimal("50.00")
         );

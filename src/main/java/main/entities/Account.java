@@ -42,9 +42,10 @@ public class Account {
         this.name = name;
         this.user = user;
         this.accountType = accountType;
+        this.active = true;
     }
 
-    public boolean isOwner(long userId){
+    public boolean isOwner(long userId) {
         return this.user.getId() == userId;
     }
 
@@ -57,6 +58,7 @@ public class Account {
                 ", balance=" + balance +
                 ", userId=" + user.getId() +
                 ", accountType=" + accountType +
+                ", active=" + active +
                 '}';
     }
 }

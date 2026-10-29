@@ -10,10 +10,8 @@ import main.entities.TransactionType;
 import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
 import main.exceptions.ValidationException;
-import main.security.JwtService;
-import main.security.SecurityConfig;
+import main.security.*;
 import main.repositories.UserRepository;
-import main.security.WithMockCustomUser;
 import main.service.TransactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,6 +37,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Import(SecurityConfig.class)
@@ -53,7 +52,6 @@ class TransactionControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-
     @Autowired
     private ObjectMapper om;
 
@@ -65,6 +63,9 @@ class TransactionControllerTest {
 
     @MockitoBean
     private JwtService jwtService;
+
+    @MockitoBean
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @MockitoBean
     private TransactionToTransactionResponseConverter converter;
@@ -180,6 +181,7 @@ class TransactionControllerTest {
         @Test
         void shouldReturn401WhenUnauthorized() throws Exception {
             mockMvc.perform(get("/transactions/accounts/1"))
+                    .andDo(print())
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -575,7 +577,7 @@ class TransactionControllerTest {
 
         @Test
         void shouldReturn401WhenUnauthorized() throws Exception {
-            mockMvc.perform(post("/transactions/accounts/{}/transfer", accountId))
+            mockMvc.perform(post("/transactions/accounts/{accountId}/transfer", accountId))
                     .andExpect(status().isUnauthorized());
         }
 

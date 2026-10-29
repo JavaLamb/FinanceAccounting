@@ -1,5 +1,6 @@
 package main.exceptions;
 
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import main.dto.Response.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -139,6 +140,21 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("BAD_CREDENTIALS")
                 .message(ex.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(JwtException ex, WebRequest request) {
+        log.warn("Authorization failed cause of JWT token is invalid : {}", ex.getMessage());
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("JWT_TOKEN_INVALID")
+                .message("JWT Token expired or broken")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 

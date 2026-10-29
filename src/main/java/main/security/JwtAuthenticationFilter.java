@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User user = userRepository.findById(Long.valueOf(userId))
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "User",
-                            String.valueOf(userId)
+                            userId
                     ));
             CustomUserDetails userDetails = new CustomUserDetails(
                     user.getHashPassword(),
@@ -57,8 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext()
                     .setAuthentication(authentication);
-        } catch (JwtException | IllegalArgumentException exception) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (JwtException exception) {
+            SecurityContextHolder.clearContext();
+            handlerExceptionResolver.resolveException(request, response, null, exception);
             return;
         }
 

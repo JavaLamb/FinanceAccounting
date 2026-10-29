@@ -16,15 +16,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.*;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 @Testcontainers
+@Transactional
 public class IntegrationTests {
     @Container
     @ServiceConnection
@@ -124,6 +128,25 @@ public class IntegrationTests {
                 .orElseThrow();
 
         assertThat(updatedAccount.getBalance()).isEqualByComparingTo("850.00");
+    }
 
+    @Test
+    void shouldReturn401WhenJwtInvalid() throws Exception {
+        String invalidJwt = jwt + "err";
+        mockMvc.perform(get("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + invalidJwt))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error")
+                        .value("JWT_TOKEN_INVALID"));
+    }
+
+    @Test
+    void shouldReturn401WhenNoToken() throws Exception {
+        mockMvc.perform(get("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error")
+                        .value("UNAUTHORIZED"));
     }
 }

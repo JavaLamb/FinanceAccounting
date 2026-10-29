@@ -1,5 +1,6 @@
 package main.security;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -21,7 +22,7 @@ public class JwtService {
         this.expiration = properties.expiration();
 
         if (expiration <= 0) {
-            throw new IllegalArgumentException(
+            throw new JwtException(
                     "JWT expiration must be positive"
             );
         }

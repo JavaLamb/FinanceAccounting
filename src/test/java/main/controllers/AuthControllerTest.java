@@ -8,6 +8,7 @@ import main.entities.User;
 import main.exceptions.ValidationException;
 import main.repositories.UserRepository;
 import main.security.CustomUserDetails;
+import main.security.JwtAuthenticationEntryPoint;
 import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.service.UserService;
@@ -40,7 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
 

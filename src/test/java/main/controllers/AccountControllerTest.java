@@ -6,6 +6,7 @@ import main.entities.Account;
 import main.entities.AccountType;
 import main.exceptions.BusinessLogicException;
 import main.exceptions.ResourceNotFoundException;
+import main.security.JwtAuthenticationEntryPoint;
 import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.converters.AccountToAccountResponseConverter;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
 @WebMvcTest(AccountController.class)
 class AccountControllerTest {
     @MockitoBean

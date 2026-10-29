@@ -6,6 +6,7 @@ import main.dto.Response.CategoryResponse;
 import main.entities.Category;
 import main.exceptions.BusinessLogicException;
 import main.repositories.UserRepository;
+import main.security.JwtAuthenticationEntryPoint;
 import main.security.JwtService;
 import main.security.SecurityConfig;
 import main.security.WithMockCustomUser;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class})
 @WebMvcTest(CategoryController.class)
 class CategoryControllerTest {
     long userId = 1L;
